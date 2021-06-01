@@ -1,0 +1,6 @@
+node_modules/
+
+server/utility/secret.pem
+
+
+server/cert/*
