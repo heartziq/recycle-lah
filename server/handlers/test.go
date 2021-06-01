@@ -27,6 +27,7 @@ type user struct {
 	Expiry   string `json:"expiry"`
 }
 
+// DB queries
 func (t *Test) ListPickup() (users []*user) {
 	// access db
 	results, err := t.Db.Query("SELECT username FROM my_db.users")
@@ -57,6 +58,11 @@ func (t *Test) ListPickup() (users []*user) {
 	return
 }
 
+func (t *Test) UseDb(db *sql.DB) error {
+	t.Db = db
+	return nil // return future potential error(s)
+}
+
 func (t *Test) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// template
@@ -77,11 +83,13 @@ func (t *Test) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// setting up template
 func (t *Test) SetTemplate(path string) {
 
 	t.Tpl = template.Must(template.ParseGlob(path))
 }
 
+// example of logging
 func (t *Test) SetErrorLog() {
 	// Set up output file
 	var f *os.File

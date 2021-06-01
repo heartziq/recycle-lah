@@ -15,13 +15,24 @@ import (
 )
 
 // map with key "login": handler type
+var (
+	handlersList = map[string]http.Handler{
+		"test": &handlers.Test{},
+	}
+)
 
 func createServer() http.Handler {
 	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/my_db")
 	if err != nil {
 		panic(err)
 	}
-	router := mux.NewRouter()
+
+	if v, ok := handlersList["test"].(*handlers.Test); ok {
+		v.UseDb(db)
+		// v.SetTemplate("templates/test/*")
+	}
+
+	router := mux.NewRouter() // Main Router
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
@@ -40,9 +51,7 @@ func createServer() http.Handler {
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/test/{id:\\d+}").
 		Queries("key", "{key}").
-		Handler(&handlers.Test{
-			Db: db,
-		})
+		Handler(handlersList["test"])
 
 	subR.Use(middleware.VerifyAPIKey)
 
