@@ -46,12 +46,21 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.VerifyAPIKey)
 
+	// collectors
+	subR.
+		Methods("GET", "PUT", "POST", "DELETE").
+		Path("/api/v1/collectors/{id:\\d+}").
+		Queries("key", "{key}").
+		HandlerFunc(handlers.Collectors)
+
 	// test
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/test/{id:\\d+}").
 		Queries("key", "{key}").
 		Handler(handlersList["test"])
+
+	subR.Use(middleware.VerifyAPIKey)
 
 	subR.Use(middleware.VerifyAPIKey)
 
