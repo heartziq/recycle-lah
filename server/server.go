@@ -23,7 +23,7 @@ var (
 )
 
 func createServer() http.Handler {
-	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/my_db")
+	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/recycle")
 	if err != nil {
 		panic(err)
 	}
@@ -38,6 +38,10 @@ func createServer() http.Handler {
 		v.UseDb(db)
 		// v.SetTemplate("templates/test/*")
 	}
+
+	// collectors
+	handlers.GetDb(db)
+
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
@@ -48,13 +52,6 @@ func createServer() http.Handler {
 		Handler(handlersList["pickups"])
 
 	subR.Use(middleware.VerifyAPIKey)
-
-	// collectors
-	subR.
-		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/collectors/{id:\\d+}").
-		Queries("key", "{key}").
-		HandlerFunc(handlers.Collectors)
 
 	// test
 	if v, ok := handlersList["test"].(*handlers.Test); ok {

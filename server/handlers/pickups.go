@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -56,8 +57,12 @@ func (p *Pickup) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// collector
 		switch r.Method {
 		case "GET": // show current pickup that I am attending
+			data := getUser()
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("[collector] View All Pickups that I Accepted"))
+			json.NewEncoder(w).Encode(data)
+			fmt.Println(data)
+
 		case "PUT": // cancel or accept
 			reqBody, err := ioutil.ReadAll(r.Body)
 			newValue := make(map[string]string)
