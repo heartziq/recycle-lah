@@ -52,6 +52,13 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.VerifyAPIKey)
 
+	// collectors
+	subR.
+		Methods("GET", "PUT", "POST", "DELETE").
+		Path("/api/v1/collectors/{id:\\d+}").
+		Queries("key", "{key}").
+		HandlerFunc(handlers.Collectors)
+
 	// test
 	if v, ok := handlersList["test"].(*handlers.Test); ok {
 		v.UseDb(db)
