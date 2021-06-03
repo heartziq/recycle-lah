@@ -19,9 +19,44 @@ type Pickup struct {
 	Error *log.Logger
 }
 
-func ShowPickup(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte("List pickups [public]"))
+// DB queries
+func (p *Pickup) ListPickup() (users []*user) {
+	// access db
+	results, err := p.Db.Query("SELECT username FROM my_db.users")
+
+	if err != nil {
+
+		panic(err.Error())
+
+	}
+
+	for results.Next() {
+
+		// map this type to the record in the table
+
+		c := user{}
+
+		err = results.Scan(&c.UserName)
+
+		if err != nil {
+
+			panic(err.Error())
+
+		}
+
+		users = append(users, &c)
+
+	}
+	return
+}
+
+func (p *Pickup) ShowPickup() http.HandlerFunc {
+	d := func(w http.ResponseWriter, r *http.Request) {
+		data := p.ListPickup()
+		json.NewEncoder(w).Encode(data)
+	}
+
+	return http.HandlerFunc(d)
 }
 
 func (p *Pickup) UseDb(db *sql.DB) error {

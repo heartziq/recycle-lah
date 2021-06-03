@@ -37,6 +37,9 @@ func createServer() http.Handler {
 	if v, ok := handlersList["pickups"].(*handlers.Pickup); ok {
 		v.UseDb(db)
 		// v.SetTemplate("templates/test/*")
+
+		// pickups: show nearby pickups
+		router.HandleFunc("/api/v1/pickups", v.ShowPickup())
 	}
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
 	subR.
@@ -62,18 +65,7 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.VerifyAPIKey)
 
-	subR.
-		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/testA/{id:\\d+}").
-		Queries("key", "{key}").
-		Handler(handlersList["testA"])
-
-	subR.Use(middleware.VerifyAPIKey)
-
 	// Public route
-
-	// pickups: show nearby pickups
-	router.HandleFunc("/api/v1/pickups", handlers.ShowPickup)
 
 	// recycle
 	router.HandleFunc("/api/v1/recycle", handlers.Recylce)
