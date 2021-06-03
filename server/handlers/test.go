@@ -64,7 +64,8 @@ func (t *Test) UseDb(db *sql.DB) error {
 }
 
 func (t *Test) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	// get auth header
+	token := r.Header.Get("Authorization")
 	// template
 	if t.Tpl != nil {
 		err := t.Tpl.ExecuteTemplate(w, "index.gohtml", struct{}{})
@@ -79,7 +80,7 @@ func (t *Test) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("get test only"))
+	w.Write([]byte(token))
 
 }
 

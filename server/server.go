@@ -52,25 +52,19 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.VerifyAPIKey)
 
-	// collectors
-	subR.
-		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/collectors/{id:\\d+}").
-		Queries("key", "{key}").
-		HandlerFunc(handlers.Collectors)
-
 	// test
 	if v, ok := handlersList["test"].(*handlers.Test); ok {
 		v.UseDb(db)
 		// v.SetTemplate("templates/test/*")
 	}
+	subR = router.NewRoute().Subrouter()
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/test/{id:\\d+}").
 		Queries("key", "{key}").
 		Handler(handlersList["test"])
 
-	subR.Use(middleware.VerifyAPIKey)
+	subR.Use(middleware.AddAuthHeader)
 
 	// Public route
 
