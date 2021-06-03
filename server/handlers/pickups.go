@@ -11,12 +11,27 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type RecycleLahHandler interface {
+	http.Handler
+	UseDb(db *sql.DB) error
+	SetTemplate(path string)
+}
+
 type Pickup struct {
 	Db  *sql.DB
 	Tpl *template.Template
 	// error logging
 	// Info  *log.Logger
 	Error *log.Logger
+}
+
+func CreatePickupHandler(db *sql.DB, templatePath string) *Pickup {
+	newPickup := &Pickup{Db: db}
+	if templatePath != "" {
+		newPickup.SetTemplate(templatePath)
+	}
+
+	return newPickup
 }
 
 // DB queries
@@ -31,9 +46,7 @@ func (p *Pickup) ListPickup() (users []*user) {
 	}
 
 	for results.Next() {
-
 		// map this type to the record in the table
-
 		c := user{}
 
 		err = results.Scan(&c.UserName)

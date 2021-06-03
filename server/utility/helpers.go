@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"errors"
-	"fmt"
 	"log"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -93,7 +92,7 @@ func VerifyToken(tokenString string) (bool, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
+		log.Println("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
 		log.Println("Token is valid.")
 		return true, nil
 	}

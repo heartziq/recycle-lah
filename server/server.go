@@ -28,19 +28,13 @@ func createServer() http.Handler {
 		panic(err)
 	}
 
+	// Initialize handlers
+	pickup := handlers.CreatePickupHandler(db, "")
+
 	router := mux.NewRouter() // Main Router
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
-
-	// pickups
-	if v, ok := handlersList["pickups"].(*handlers.Pickup); ok {
-		v.UseDb(db)
-		// v.SetTemplate("templates/test/*")
-
-		// pickups: show nearby pickups
-		router.HandleFunc("/api/v1/pickups", v.ShowPickup())
-	}
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
@@ -48,7 +42,7 @@ func createServer() http.Handler {
 		Queries("key", "{key}").
 		// Queries("limit", "{limit}").
 		Queries("role", "{role:user|collector}").
-		Handler(handlersList["pickups"])
+		Handler(pickup)
 
 	subR.Use(middleware.VerifyAPIKey)
 
@@ -57,6 +51,10 @@ func createServer() http.Handler {
 		v.UseDb(db)
 		// v.SetTemplate("templates/test/*")
 	}
+
+	//
+	// A route "test" that use AddAuthHeader middleware
+	//
 	subR = router.NewRoute().Subrouter()
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
@@ -67,7 +65,7 @@ func createServer() http.Handler {
 	subR.Use(middleware.AddAuthHeader)
 
 	// Public route
-
+	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
 	router.HandleFunc("/api/v1/recycle", handlers.Recylce)
 
