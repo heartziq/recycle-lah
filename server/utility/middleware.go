@@ -28,3 +28,12 @@ func VerifyAPIKey(next http.Handler) http.Handler {
 
 	return newHandlerFunc
 }
+
+func AddAuthHeader(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		r.Header.Set("Authorization", "Bearer somerandomtokenstring")
+		next.ServeHTTP(w, r)
+	})
+}

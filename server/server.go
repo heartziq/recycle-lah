@@ -19,7 +19,8 @@ import (
 // map with key "login": handler type
 var (
 	handlersList = map[string]http.Handler{
-		"test": &handlers.Test{},
+		"test":    &handlers.Test{},
+		"pickups": &handlers.Pickup{},
 	}
 )
 
@@ -29,33 +30,41 @@ func createServer() http.Handler {
 		panic(err)
 	}
 
-	if v, ok := handlersList["test"].(*handlers.Test); ok {
-		v.UseDb(db)
-		// v.SetTemplate("templates/test/*")
-	}
+	// Initialize handlers
+	pickup := handlers.CreatePickupHandler(db, "")
 
 	router := mux.NewRouter() // Main Router
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
-
-	// pickups
+	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/pickups/{id:\\d+}").
 		Queries("key", "{key}").
-		HandlerFunc(handlers.Pickups)
+		// Queries("limit", "{limit}").
+		Queries("role", "{role:user|collector}").
+		Handler(pickup)
 
 	subR.Use(middleware.VerifyAPIKey)
 
 	// test
+	if v, ok := handlersList["test"].(*handlers.Test); ok {
+		v.UseDb(db)
+		// v.SetTemplate("templates/test/*")
+	}
+
+	//
+	// A route "test" that use AddAuthHeader middleware
+	//
+	subR = router.NewRoute().Subrouter()
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/test/{id:\\d+}").
 		Queries("key", "{key}").
 		Handler(handlersList["test"])
 
-	subR.Use(middleware.VerifyAPIKey)
+	subR.Use(middleware.AddAuthHeader)
 
 	// users
 	// URI: http://localhost:5000/api/v1/users/user2345?key=secretkey with json data struct: NewUser
@@ -93,7 +102,7 @@ func createServer() http.Handler {
 		HandlerFunc(userhandler.TestUsers)
 
 	// Public route
-
+	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
 	router.HandleFunc("/api/v1/recycle", handlers.Recylce)
 	return router
