@@ -1,11 +1,22 @@
-1. Generate **own** server certificate and respective private keys
+1. Clone project
 
-```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert/key.pem -out cert/cert.pem
+```shell
+git clone https://github.com/heartziq/recycle-lah.git
 ```
 
-2. From the root folder, run
-```bash
+2. Generate own secret keys and certificate
+```shell
+cd recycle-lah
+./runthis.sh
+```
+
+3. Verify all dependencies are install
+```shell
+go mod tidy
+```
+
+4. Run server
+```shell
 cd server
 go run server.go
 ```
