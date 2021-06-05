@@ -49,11 +49,11 @@ var (
 	}
 )
 
-type RecycleLahHandler interface {
-	http.Handler
-	UseDb(db *sql.DB) error
-	SetTemplate(path string)
-}
+// type RecycleLahHandler interface {
+// 	http.Handler
+// 	UseDb(db *sql.DB) error
+// 	SetTemplate(path string)
+// }
 
 type pickup struct {
 	Id        string  `json:"id"`
@@ -335,7 +335,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				log.Printf("payload: %v\n", payload)
+				// log.Printf("payload: %v\n", payload)
 				p.acceptPickup(payload["pickup_id"], payload["collector_id"])
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte("Update record(s)"))
