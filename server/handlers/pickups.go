@@ -44,7 +44,7 @@ var (
 		
 		FROM your_db.pickups
 
-		WHERE attend_by=?
+		WHERE attend_by=? AND completed=false;
 		`,
 	}
 )
