@@ -33,8 +33,19 @@ var (
 		completed
 		
 		FROM your_db.pickups
-		WHERE id='e6140956-ea54-48f5-85f6-036292b056f9'
+		WHERE created_by=?
         AND attend_by!='';`,
+		"PickIAccept": `
+		SELECT 
+		id, ST_X(coord) as lat, ST_Y(coord) as lng,
+		address,
+		created_by, attend_by,
+		completed
+		
+		FROM your_db.pickups
+
+		WHERE attend_by=?
+		`,
 	}
 )
 
@@ -163,9 +174,9 @@ func (p *PickupHandler) approvePickup(pickup_id string) error {
 	return nil
 }
 
-func (p *PickupHandler) showPickupInProgress() (users []*pickup) {
+func (p *PickupHandler) showPickupInProgress(user_id string) (users []*pickup) {
 	// access db
-	results, err := p.Db.Query(DBQuery["GetPickupInProgress"])
+	results, err := p.Db.Query(DBQuery["GetPickupInProgress"], user_id)
 
 	if err != nil {
 
@@ -195,6 +206,55 @@ func (p *PickupHandler) showPickupInProgress() (users []*pickup) {
 	return
 }
 
+func (p *PickupHandler) showAcceptedPickups(collector_id string) (result []*pickup) {
+	// PickIAccept
+	// access db
+	results, err := p.Db.Query(DBQuery["PickIAccept"], collector_id)
+
+	if err != nil {
+
+		panic(err.Error())
+
+	}
+
+	for results.Next() {
+		// map this type to the record in the table
+		c := pickup{}
+
+		err = results.Scan(
+			&c.Id,
+			&c.Lat, &c.Lng,
+			&c.Address, &c.CreatedBy,
+			&c.Collector, &c.Completed,
+		)
+
+		if err != nil {
+
+			panic(err.Error())
+
+		}
+		result = append(result, &c)
+
+	}
+	return
+
+}
+
+func (p *PickupHandler) deletePickup(pickup_id string) error {
+	results, err := p.Db.Exec("DELETE FROM your_db.pickups WHERE id=?;", pickup_id)
+	if err != nil {
+		return errors.New("Error deleting record")
+	}
+
+	rows, _ := results.RowsAffected()
+
+	if rows < 1 {
+		return errors.New("record not found")
+	}
+
+	return nil
+}
+
 func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// User
 	vars := mux.Vars(r)
@@ -204,7 +264,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if role == "user" {
 		switch r.Method {
 		case "GET": // pickup in progress
-			result := p.showPickupInProgress()
+			result := p.showPickupInProgress("12345")
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
 		case "POST":
@@ -239,15 +299,29 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("approve successful!"))
 
 		case "DELETE":
-			w.WriteHeader(http.StatusAccepted)
-			w.Write([]byte("[user] Delete a pickup"))
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+
+			}
+			payload := map[string]string{}
+			json.Unmarshal(body, &payload)
+			if err := p.deletePickup(payload["pickup_id"]); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("sql/server error -- operation aborted!"))
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Deleted!"))
 		}
 	} else {
 		// collector
 		switch r.Method {
 		case "GET": // show current pickup that I am attending
+			result := p.showAcceptedPickups("54321")
 			w.WriteHeader(http.StatusAccepted)
-			w.Write([]byte("[collector] View All Pickups that I Accepted"))
+			json.NewEncoder(w).Encode(result)
 		case "PUT": // cancel or accept
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err == nil {

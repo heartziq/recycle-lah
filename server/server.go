@@ -34,7 +34,7 @@ func createServer() http.Handler {
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
-	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
+	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/pickups/{id:\\d+}").
