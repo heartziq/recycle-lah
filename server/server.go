@@ -14,16 +14,14 @@ import (
 	middleware "github.com/heartziq/recycle-lah/server/utility"
 )
 
-// map with key "login": handler type
 var (
 	handlersList = map[string]http.Handler{
-		"test":    &handlers.Test{},
-		"pickups": &handlers.Pickup{},
+		"test": &handlers.Test{},
 	}
 )
 
 func createServer() http.Handler {
-	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/my_db")
+	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +29,8 @@ func createServer() http.Handler {
 	// Initialize handlers
 	pickup := handlers.CreatePickupHandler(db, "")
 
-	router := mux.NewRouter() // Main Router
+	// Init Main Router
+	router := mux.NewRouter()
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
