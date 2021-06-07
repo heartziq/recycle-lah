@@ -11,6 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 
+	"github.com/heartziq/recycle-lah/Packages/internet"
 	handlers "github.com/heartziq/recycle-lah/server/handlers"
 	userhandler "github.com/heartziq/recycle-lah/server/userhandler"
 	middleware "github.com/heartziq/recycle-lah/server/utility"
@@ -48,6 +49,8 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.VerifyAPIKey)
 
+	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
+
 	// test
 	if v, ok := handlersList["test"].(*handlers.Test); ok {
 		v.UseDb(db)
@@ -63,7 +66,6 @@ func createServer() http.Handler {
 		Path("/api/v1/test/{id:\\d+}").
 		Queries("key", "{key}").
 		Handler(handlersList["test"])
-
 	subR.Use(middleware.AddAuthHeader)
 
 	// users
@@ -101,6 +103,12 @@ func createServer() http.Handler {
 		Queries("key", "{key}").
 		HandlerFunc(userhandler.TestUsers)
 
+	//URI: https://localhost:5000/api/v1/newuser
+	subR.
+		Methods("POST").
+		Path("/api/v1/newuser/").
+		HandlerFunc(handlers.NewUser)
+
 	// Public route
 	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
@@ -109,15 +117,17 @@ func createServer() http.Handler {
 }
 
 func main() {
+
+	internet.Htmlmain()
 	// Instantiate server
 	router := createServer()
 
 	// Serve
 	go func() {
-		// fmt.Println("starting server at port 5000 WITHOUT TLS")
-		// http.ListenAndServe(":5000", router)
-		fmt.Println("starting server at port 5000 with TLS")
-		http.ListenAndServeTLS(":5000", "cert/cert.pem", "cert/key.pem", router)
+		fmt.Println("starting server at port 5000 WITHOUT TLS")
+		http.ListenAndServe(":5000", router)
+		// fmt.Println("starting server at port 5000 with TLS")
+		// http.ListenAndServeTLS(":5000", "cert/cert.pem", "cert/key.pem", router)
 	}()
 
 	c := make(chan os.Signal)

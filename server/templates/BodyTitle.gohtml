@@ -1,0 +1,53 @@
+{{define "BodyTitle"}}
+<div class="MainBar">
+  <div style="left: 0">
+    <h1 style="margin-left: 5px">
+      <u>Car Rental App - {{.PageName}}</u>
+    </h1>
+  </div>
+  <div style="right: 0">
+    <div style="display: flex; flex-direction: row-reverse">
+      {{if eq .PageName "Log Out"}}
+      <div style="display: inline">
+        <h3 style="margin: 0px 5px">
+          <a style="text-decoration: none" href="/login"> Log in</a>
+        </h3>
+      </div>
+      <div style="display: inline">
+        <h3 style="margin: 0px 20px">See You Again!</h3>
+      </div>
+      {{else}}
+
+      {{if eq .PageName "New User Registration"}}
+      <div style="display: inline">
+        <h3 style="margin: 0px 5px">
+          <a style="text-decoration: none" href="/login"> Log in</a>
+        </h3>
+      </div>
+      <div style="display: inline">
+        <h3 style="margin: 0px 20px">Hello!</h3>
+      </div>
+      {{else}}
+
+      {{if eq .UserName ""}}
+      <div style="display: inline">
+        <h3 style="margin: 0px 20px">Hello!</h3>
+      </div>
+      {{else}}
+      <div style="display: inline">
+        <h3 style="margin: 0px 5px">
+          <a style="text-decoration: none" href="/logout"> Log Out</a>
+        </h3>
+      </div>
+      <div style="display: inline">
+        <h3 style="margin: 0px 20px">Account: {{.UserName}}</h3>
+      </div>
+      {{ end }}
+
+      {{ end }}
+
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}

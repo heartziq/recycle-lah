@@ -1,0 +1,19 @@
+TRACE: 2021/06/04 10:31:20 errlog.go:47: errlog:logger.go - init()
+Info: 2021/06/04 10:31:20 util_user.go:60: DB opened
+Info: 2021/06/04 10:31:35 userhandler.go:337: r.Host localhost:5000
+Info: 2021/06/04 10:31:35 userhandler.go:338: r.URL /api/v1/users/user4567?key=secretkey
+Info: 2021/06/04 10:31:35 userhandler.go:339: r.RequestURI /api/v1/users/user4567?key=secretkey
+Info: 2021/06/04 10:31:35 userhandler.go:340: r.Context context.Background.WithValue(type *http.contextKey, val <not Stringer>).WithValue(type *http.contextKey, val [::1]:5000).WithCancel.WithCancel.WithValue(type mux.contextKey, val <not Stringer>).WithValue(type mux.contextKey, val <not Stringer>)
+Info: 2021/06/04 10:31:35 userhandler.go:341: r.Header map[Accept:[*/*] Authorization:[Bearer somerandomtokenstring] Content-Length:[57] Content-Type:[application/json] User-Agent:[curl/7.55.1]]
+TRACE: 2021/06/04 10:31:35 userhandler.go:281: map[id:user4567 key:secretkey]
+TRACE: 2021/06/04 10:31:35 userhandler.go:312: id supplied=user4567
+TRACE: 2021/06/04 10:31:35 userhandler.go:329: request body:{"password":"password","email:":"mail","collector":false}
+Info: 2021/06/04 10:31:35 userhandler.go:353: USER4567 {"password":"password","email:":"mail","collector":false} <nil>
+TRACE: 2021/06/04 10:31:35 userhandler.go:37: afeter pre-processing request USER4567 {"password":"password","email:":"mail","collector":false}
+TRACE: 2021/06/04 10:31:35 userhandler.go:108: USER4567 {"password":"password","email:":"mail","collector":false}
+TRACE: 2021/06/04 10:31:35 userhandler.go:115: ====================newUser {password  false} USER4567 password 
+TRACE: 2021/06/04 10:31:35 userhandler.go:125: {password  false}
+TRACE: 2021/06/04 10:31:35 userhandler.go:153: Going to add: USER4567 
+Info: 2021/06/04 10:31:35 userhandler.go:221: Number of rows added: 1
+TRACE: 2021/06/04 10:31:35 userhandler.go:168: >>>>>>201 - User added: USER4567
+TRACE: 2021/06/04 10:31:35 userhandler.go:268: response=:{Success:true Timestamp:0 Message:}

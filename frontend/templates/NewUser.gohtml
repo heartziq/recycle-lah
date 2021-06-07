@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/Stuff/Style.css">
+    {{template "HeadTitle" .PageName}}
+    <!-- <title>Car Rental App - New User Registration</title> -->
+</head>
+
+<body>
+    {{template "BodyTitle" .}}
+    <br>
+    <h3 class="Application">Please enter user name, password and email for registration!</h3>
+    <div class="Application">
+        <form method="post">
+            <div>
+                <div class="InApplication">
+                    <input class="InApplication" type="text" name="name" placeholder="User Name">
+                </div>
+                <div class="InApplication">
+                    <input class="InApplication" type="password" name="password" placeholder="Password">
+                </div>
+                <div class="InApplication">
+                    <input class="InApplication" type="password" name="confirmpassword" placeholder="Confirm Password">
+                </div>
+
+                <div class="InApplication" style="border:none;">
+                    <input style="padding:0 ; margin:0; width:fit-content" type="checkbox" name="collector"
+                        value="true">
+                    <label for="collector">Collector</label>
+                </div>
+            </div>
+            <input class="InApplication" type="text" name="email" placeholder="Email">
+            <input class="Application" type="submit">
+            <b><a href="/login">Log In</a></b>
+        </form>
+    </div>
+    <h4 class="Application" id="MsgToUser"></h4>
+
+
+</body>
+
+</html>

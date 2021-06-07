@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/Stuff/Style.css">
+    {{template "HeadTitle" .PageName}}
+</head>
+
+<body>
+    {{template "BodyTitle" .}}
+    <br>
+    <div style="padding: 5px;">
+        <h3 id="title1">Here is your booking records</h3><br>
+    </div>
+    <div class="ViewBookings">
+        <table>
+            <tr>
+                <th>Booking ID</td>
+                <th>Car Model</td>
+                <th>Start Date</td>
+                <th>End Date</td>
+                <th>Day/s</td>
+                <th>SGD</td>
+                <th>Total SGD</td>
+            </tr>
+            {{range $v := $.Bookings}}
+            <tr>
+                {{range $v1 := $v}}
+                <td>{{$v1}}</td>
+                {{end}}
+
+            </tr>
+            {{end}}
+        </table>
+    </div>
+
+    {{template "Footer"}}
+</body>
+
+</html>

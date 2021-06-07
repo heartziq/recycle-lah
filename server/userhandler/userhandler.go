@@ -26,6 +26,7 @@ func init() {
 	// Tpl = template.Must(template.ParseGlob("templates/user/*"))
 }
 
+//**Templated
 func Users(w http.ResponseWriter, r *http.Request) {
 	p("Sook in Users() - case POST 0")
 	defer recoverFunc()
