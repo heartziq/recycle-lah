@@ -1,4 +1,4 @@
-package internet
+package main
 
 import (
 	"bytes"
@@ -32,8 +32,7 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-func Htmlmain() {
-	fmt.Println("Htmlmain")
+func main() {
 
 	//Main Pages
 	http.HandleFunc("/", mainMenu)
@@ -66,7 +65,6 @@ type nUser struct {
 //Web Main Pages func from below---------------------------------------------------------------------------//
 //New User
 func newUser(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("Htmlmain.newUser")
 
 	Data := struct {
 		PageName  string
@@ -124,7 +122,6 @@ func newUser(res http.ResponseWriter, req *http.Request) {
 
 //log in
 func logIn(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("HTMLmain.logIn")
 
 	Data := struct {
 		PageName  string
@@ -166,7 +163,6 @@ func logIn(res http.ResponseWriter, req *http.Request) {
 
 //Main Menu
 func mainMenu(res http.ResponseWriter, req *http.Request) {
-	log.Println("mainMenu")
 
 	Data := struct {
 		PageName string
@@ -198,7 +194,6 @@ func mainMenu(res http.ResponseWriter, req *http.Request) {
 
 //Log Out
 func logOut(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("Htmlmain.logOut")
 
 	Data := struct {
 		PageName string
