@@ -11,19 +11,33 @@
     {{template "BodyTitle" .}}
     <br>
     <div style="padding: 5px;">
-        <h3 id="title1">Please selete jobs</h3><br>
+        <h3 id="title1">Available Pickup Job</h3><br>
+    </div>
+
+    <div>
+        <div class='display'>
+
+
+            {{range $v := .Jobs}}
+            <div class="JobsAvailable" id="{{$v.JobID}}" onclick="change('{{$v.JobID}}');">
+                <h1>{{$v.JobID}}</h1>
+                <h1>{{$v.Address}}</h1>
+                <h1>{{$v.Postcode}}</h1>
+                <h1>{{$v.Description}}</h1>
+                <h1>{{$v.WeidthRange}}</h1>
+            </div>
+            {{end}}
+        </div>
     </div>
     <form method="POST">
-        <div>
-            <div class='display' style='height: fit-content ;width: 100%'>
+        <div id="divDuration" class="Application"
+            style="padding: 5px; overflow: hidden; width:0; height: 0; margin-top: 18px;">
 
-            </div>
+
+
         </div>
+        <input class="Application" style="margin-left: 0" type="submit">
     </form>
-
-    <br><br>
-
-    {{template "Footer"}}
 
 
 </body>

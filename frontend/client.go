@@ -23,7 +23,7 @@ var (
 	tpl           *template.Template
 	emailRegex    = regexp.MustCompile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$") // regular expression
 	mapUsers      = map[string]user{"r@l.com": user{"recycle", "278d0e77-76c2-4447-bbfb-6fb032f57414"}}                                 //**temporary use data
-	mapSessions   = map[string]string{}
+	mapSessions   = map[string]string{"278d0e77-76c2-4447-bbfb-6fb032f57414": "r@l.com"}
 	matchPassword = map[string]string{"r@l.com": "password"} //**need to get from Database
 )
 
@@ -215,22 +215,36 @@ func logOut(res http.ResponseWriter, req *http.Request) {
 
 //Web Sub Pages func start from below---------------------------------------------------------------------------//
 
-//Book A Car
 func pickUp(res http.ResponseWriter, req *http.Request) {
 
-	Data := struct {
-		PageName   string
-		UserName   string
-		CarDisplay []string
-	}{PageName: "Jobs List"}
+	type Job struct {
+		JobID       string
+		Address     string
+		Postcode    string
+		Description string
+		WeidthRange string
+	}
 
+	Data := struct {
+		PageName string
+		UserName string
+		Jobs     []Job
+	}{PageName: "Jobs List"}
+	//get the jobs list from API Server for bellow data.
+	Job1 := Job{"001", "70 Woodlands Avenue 7", "738344", "2 Bags of Plastic Bottles", "1) up to 1kg"}
+	var Jobs []Job
+	for i := 5; i > 0; i-- {
+		Jobs = append(Jobs, Job1)
+	}
+	Data.Jobs = Jobs
+	log.Println(Data.Jobs)
 	cookie, err := req.Cookie("RecycleLah")
-	Data.UserName = mapSessions[cookie.Value]
-	// Data.CarDisplay = vhcs.GetCarNames()
+	Data.UserName = mapUsers[mapSessions[cookie.Value]].UserName
 	if _, ok := mapSessions[cookie.Value]; err != nil || !ok {
 		http.Redirect(res, req, "/menu", http.StatusSeeOther)
 		return
 	} else {
+
 		// if req.Method == http.MethodPost {
 
 		// }
@@ -253,8 +267,6 @@ func viewStatus(res http.ResponseWriter, req *http.Request) {
 	} else {
 		currentUser := mapUsers[mapSessions[cookie.Value]]
 		Data.UserName = currentUser.UserName
-		// Data.Bookings = bks.ShowAllUserBookings(Data.UserName)
-		// fmt.Println(Data.Bookings)
 	}
 	tpl.ExecuteTemplate(res, "ViewBooking.gohtml", Data)
 }
@@ -309,7 +321,7 @@ func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "RL_UpdateUserDetail.gohtml", Data)
 }
 
-//Web pull out func ---------------------------------------------------------------------------//
+//Pull out func ---------------------------------------------------------------------------//
 //set cookie on client computer
 func setCookie(res http.ResponseWriter, id string) error {
 	//name of cookies = "cookie" for 1hr & "RecycleLah" for 2yrs

@@ -60,20 +60,20 @@ div.mdisplay {
   overflow: hidden;
 }
 
-/* bookcar car picture layout */
+/* JobsAvailable */
 div.display {
   display: flex;
   flex-wrap: wrap;
-  width: auto;
-  height: fit-content;
+  width: 100%;
+  height: 100%;
 }
 
-.display > div {
+div.JobsAvailable {
   margin: 5px;
   border: 1px solid #66bfbf;
-  width: 180px;
-  overflow: hidden;
-  border-radius: 10%;
+  width: 100%;
+  height: 50%;
+  /* overflow: hidden; */
 }
 
 .display > div:hover,
@@ -82,7 +82,7 @@ div.mdisplay:hover {
   color: #eaf6f6;
 }
 
-div.display img {
+/* div.display img {
   width: 100%;
   height: auto;
 }
@@ -92,7 +92,7 @@ div.display img {
   text-align: center;
   padding: 0px;
   margin: 0px;
-}
+} */
 
 /* data input page */
 h3.Application,
@@ -137,15 +137,6 @@ input.InApplication:focus {
   outline: none;
   background: transparent;
 }
-/* div.InApplication {
-  border: solid;
-  border-color: #66bfbf;
-  overflow: hidden;
-  border-width: 1.5px;
-  padding: 0;
-  margin-left: 5%;
-  width: 90%;
-} */
 
 div.ViewBookings {
   width: 95%;
