@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"html/template"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -261,6 +260,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	// limit := vars["limit"]
 	role := vars["role"]
+	pickup_id := vars["id"]
 
 	if role == "user" {
 		switch r.Method {
@@ -268,7 +268,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			result := p.showPickupInProgress("12345") // replace "12345" with user_id
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
-		case "POST": // Request for pickup
+		case "POST": // Request for pickup (status, desc and weight_range, creation_date, updated_date)
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
@@ -287,27 +287,27 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("inserted"))
 		case "PUT": // Approve a pickup
-			reqBody, err := io.ReadAll(r.Body)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("error parsing body"))
-				return
-			}
-			payload := map[string]string{}
-			json.Unmarshal(reqBody, &payload)
-			p.approvePickup(payload["pickup_id"])
+			// reqBody, err := io.ReadAll(r.Body)
+			// if err != nil {
+			// 	w.WriteHeader(http.StatusBadRequest)
+			// 	w.Write([]byte("error parsing body"))
+			// 	return
+			// }
+			// payload := map[string]string{}
+			// json.Unmarshal(reqBody, &payload)
+			p.approvePickup(pickup_id)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("approve successful!"))
 
 		case "DELETE": // Cancel a pickup
-			body, err := io.ReadAll(r.Body)
-			if err != nil {
-				panic(err)
+			// body, err := io.ReadAll(r.Body)
+			// if err != nil {
+			// 	panic(err)
 
-			}
-			payload := map[string]string{}
-			json.Unmarshal(body, &payload)
-			if err := p.deletePickup(payload["pickup_id"]); err != nil {
+			// }
+			// payload := map[string]string{}
+			// json.Unmarshal(body, &payload)
+			if err := p.deletePickup(pickup_id); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("sql/server error -- operation aborted!"))
 				return
@@ -323,7 +323,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			result := p.showAcceptedPickups("54321")
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
-		case "PUT": // cancel or accept
+		case "PUT": // cancel or accept (0,1,2,9)
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err == nil {
 				payload := map[string]string{}

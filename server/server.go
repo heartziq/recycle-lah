@@ -37,7 +37,7 @@ func createServer() http.Handler {
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/pickups/{id:\\d+}").
+		Path("/api/v1/pickups/{id}").
 		Queries("key", "{key}").
 		// Queries("limit", "{limit}").
 		Queries("role", "{role:user|collector}").
