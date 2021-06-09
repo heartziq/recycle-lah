@@ -47,8 +47,8 @@ func initSecretKey() string {
 func GenToken(secret, userid string) (string, error) {
 
 	mySigningKey := []byte(secret)
-	expiryDate := time.Now().Add(time.Hour * 24 * 7).Unix()
-
+	// expiryDate := time.Now().Add(time.Hour * 24 * 7).Unix()
+	expiryDate := time.Now().Add(time.Minute * 30).Unix()
 	// get userid
 
 	// Create the Claims
@@ -92,8 +92,8 @@ func VerifyToken(tokenString string) (bool, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		log.Println("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
-		log.Println("Token is valid.")
+		Info.Println("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
+		Info.Println("Token is valid.")
 		return true, nil
 	}
 
@@ -111,3 +111,20 @@ func VerifyPassword(hashedPassword []byte, password string) bool {
 		return true
 	}
 }
+
+// returns []byte hashed password on a given string
+func HashPassword(password string) []byte {
+	if hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost); err != nil {
+		Error.Println(err)
+		return nil
+	} else {
+		return hash
+	}
+}
+
+// func ErrorResponse(w http.ResponseWriter, message string) {
+// 	Trace.Printf("response=:%+v\n", message)
+// 	w.Header().Set("Content-Type", "application/json")
+// 	rsp.Timestamp = int(time.Now().Unix())
+// 	json.NewEncoder(w).Encode(rsp)
+// }
