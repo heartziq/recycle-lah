@@ -11,7 +11,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		PageName string
 		UserName string
 	}{PageName: "Recyle Lah! Home Page"}
-	executeTemplate(w, "index_sook.gohtml", Data)
+	executeTemplate(w, "index.gohtml", Data)
 }
 
 //  contact()  provides contact detailss

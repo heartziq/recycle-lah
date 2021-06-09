@@ -1,0 +1,8 @@
+TRACE: 2021/06/09 17:36:56 errlog.go:42: errlog:logger.go - init()
+TRACE: 2021/06/09 17:36:56 webapp.go:25: main.go - init()
+Info: 2021/06/09 17:36:56 webapp.go:121: Listerning at port server ::5221
+Info: 2021/06/09 17:37:44 webapp.go:110: Signal from OS, starting shutdown
+Info: 2021/06/09 17:37:44 webapp.go:125: server.ListenAndServer() - http.ErrServerClosed detected, wait for wg
+Info: 2021/06/09 17:37:44 webapp.go:115: server.Shutdown successful
+TRACE: 2021/06/09 17:37:44 webapp.go:93: =====defer main() before cleanUp()=====
+Info: 2021/06/09 17:37:44 util.go:85:     start cleaning up, closing database

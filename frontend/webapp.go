@@ -49,42 +49,6 @@ func init() {
 
 func main() {
 	fmt.Println("in main - merging with Sin Yaw's")
-	// now := int(time.Now().Unix())
-	// nextMin := int(time.Now().Add(time.Hour * 1).Unix())
-	// fmt.Println("now=", now)
-	// fmt.Println("now=", nextMin)
-	// fmt.Println("diff=", nextMin-now)
-
-	// i := int(time.Now().Add(time.Minute * 2).Unix())
-	// fmt.Println("i=", i)
-	// dt := time.Now()
-	// fmt.Println("current dt", dt.String())
-	// now1 := time.Now().UnixNano() / int64(time.Millisecond)
-	// fmt.Println("now1 (millisecond)=", now1)
-	// now1 = time.Now().UnixNano() / int64(time.Second)
-	// fmt.Println("now1 (Second)=", now1)
-	// t1 := time.Unix(now1, 0)
-	// fmt.Println("t1 (time.Unix(now1, 0))=", t1)
-	// now2 := time.Now().UnixNano() / int64(time.Minute)
-	// fmt.Println("now2 (minute =", now2)
-	// t1 = time.Unix(now2, 0)
-	// fmt.Println("t1 (time.Unix(now2, 0))=", t1)
-
-	// i, err := strconv.ParseInt(userSession.sessionCreatedTime, 10, 64)
-	// fmt.Println(i)
-	// tm := time.Unix(userSession.sessionCreatedTime, 0)
-
-	// ok
-	//recycle()
-	// ok
-	// recyclePost()
-	// ok
-	// recyclePostUser()
-	// err1 := testaddUser() - not ok
-	// if err1 != nil {
-	// 	fmt.Println(err1)
-	// }
-	// os.Exit(1)
 
 	defer func() {
 		if r := recover(); r != nil {
