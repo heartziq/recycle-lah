@@ -7,6 +7,7 @@ import (
 
 //  index() - home page
 func index(w http.ResponseWriter, r *http.Request) {
+	errlog.Trace.Println("making changes at the remote end")
 	Data := struct {
 		PageName string
 		UserName string
