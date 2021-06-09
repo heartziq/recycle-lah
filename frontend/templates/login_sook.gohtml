@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" }}
+<body>
+ <div class="container">
+<h1>Sign in</h1>
+     <form method="post" >
+      <br>
+       <label for="userid" class="label">User Id </label>
+       <br />
+        <input id="userid" type="text" name="userid" placeholder="userid" required class="input" autofocus>
+        <br>
+        <label for="pwd" class="label">Password </label>
+        <br />
+        <input id="pwd" type="password" name="pwd" placeholder="password" autocomplete="off" class="input" required><br>
+        <br>
+        <input type="submit" class="submit">
+    </form>
+    <br />
+<br />
+{{ range $key, $value := . }}
+  {{ if eq $key "Message" }}
+    <p> {{ $value  }} <p>
+     {{ end }}
+{{ end }}
+{{ range $key, $value := . }}
+  {{ if eq $key "Error" }}
+     <p> {{  $value  }} <p>
+     {{ end }}
+{{ end }}
+<br />
+<!--
+<a class="lead pull-right" href="/newuser">Create new Account</a>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    -->
+    </div>
+ </body>
+</html>

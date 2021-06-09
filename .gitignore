@@ -4,3 +4,5 @@ server/utility/secret.pem
 
 
 server/cert/*
+
+log/*

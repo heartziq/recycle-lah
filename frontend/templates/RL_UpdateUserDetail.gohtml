@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/Stuff/Style.css">
+    {{template "HeadTitle" .PageName}}
+</head>
+
+<body>
+    {{template "BodyTitle" .}}
+    <br>
+    <h3 class="Application">Please enter email and password to verify!</h3>
+    <form method="post">
+        <div class="Application">
+            <div>
+                <input class="InApplication" type="text" name="email" placeholder="Email">
+                <input class="InApplication" type="password" name="oldpassword" placeholder="Old Password">
+            </div>
+        </div>
+        <h3 class="Application" style="margin-top: 20pt;">Please enter new password and confirm password!</h3>
+        <div class="Application">
+            <div>
+                <input class="InApplication" type="text" name="newusername" placeholder="New User Name">
+                <input class="InApplication" type="password" name="newpassword" placeholder="New Password">
+                <input class="InApplication" type="password" name="confirmpassword" placeholder="Confirm New Password">
+            </div>
+            <input class="Application" type="submit">
+        </div>
+    </form>
+    <h4 class="Application" id="MsgToUser"></h4>
+    {{template "Footer"}}
+</body>
+
+</html>

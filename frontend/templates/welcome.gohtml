@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" }}
+<body>
+  {{ template "prinavbar" . }}
+  <div class="container">
+    <h1>Welcome<h1>
+    <br />
+    {{ if .Token }}
+       Token = {{ .Token }}
+    {{ end }}
+    <br />
+  </div>
+ </body>
+</html>

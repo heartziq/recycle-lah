@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/Stuff/Style.css">
+    {{template "HeadTitle" .PageName}}
+</head>
+
+<body>
+    {{template "BodyTitle" .}}
+    <br>
+    <h3 class="Application">Please log in with username and password!</h3>
+    <div class="Application">
+        <form method="post">
+            <div style="padding-bottom: 19px;">
+                <div class="InApplication">
+                    <input class="InApplication" type="text" name="userid" placeholder="userid"><br>
+                </div>
+                <div class="InApplication">
+                    <input class="InApplication" type="password" name="password" placeholder="Password"><br>
+                </div>
+            </div>
+            <input class="Application" type="submit" value="Log In">
+            <b><a href="/newuser">New User</a></b>
+        </form>
+    </div>
+    <h4 class="Application" id="MsgToUser"></h4>
+</body>
+
+</html>

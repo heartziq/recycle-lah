@@ -1,0 +1,16 @@
+{{ define "col_prinavbar" }}
+<br />
+  <div class="container">
+    <nav>
+      {{ .UserName }}
+      {{ if .Since }}
+          connected since {{ .Since }}
+      {{end}}
+      <a href="/collector_welcome" class="navpadding">Jobs Available</a>
+            <a href="/collector_welcome" class="navpadding">Cancel Job???</a>
+            <a href="/collector_welcome" class="navpadding">Jobs Completed???</a>
+      <a href="/logout" class="navpadding">Sign out</a>&nbsp;&nbsp;
+    <nav>
+  </div>
+  <br />
+{{ end }}

@@ -1,0 +1,23 @@
+
+
+type user struct {
+	UserName string
+	// Password string
+	Key string
+}
+
+to use userid as the key instead of email
+	mapUsers      = map[string]user{"r@l.com": user{"recycle", "278d0e77-76c2-4447-bbfb-6fb032f57414"}}                                 //**temporary use data
+
+func newUser(res http.ResponseWriter, req *http.Request) {
+			// SOOKMODIFIED matchPassword[email] = password //**temporary use
+			// mapSessions[id] = email
+			// mapUsers[email] = user{username, id}
+
+func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
+			// SOOKMODIFIED mapUsers[email] = user{newusername, mapUsers[email].Key}
+
+
+func logIn(res http.ResponseWriter, req *http.Request) {
+    
+

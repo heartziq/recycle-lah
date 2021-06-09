@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" }}
+<body>
+ <div class="container">
+<h1>Create New Account</h1>
+<br />
+     <form method="post" >
+      <br>
+       <label for="username">User Id </label>
+       <br />
+        <input id="userid" type="text" name="userid"  class="input" required autofocus>
+        <br>
+        <label for="username">User name </label>
+       <br />
+        <input id="username" type="text" name="username"  class="input" >
+        <br>
+        <label for="email">Email </label>
+       <br />
+        <input id="email" type="text" name="email" class="input" >
+       <br />
+        <label for="pwd">Password </label>
+        <br />
+        <input id="pwd1" type="password" name="pwd1"  autocomplete="off" class="input" req>
+        <br />
+        <label for="pwd">Confirm Password </label>
+        <br />
+        <input id="pwd2" type="password" name="pwd2"  autocomplete="off" class="input" required>
+        <br>
+        <br>
+       <input type="submit" class="submit" >
+ 
+      </form>
+    <br />
+<br />
+{{ range $key, $value := . }}
+  {{ if eq $key "Message" }}
+    <p> {{ $value  }} <p>
+  {{ end }}
+  {{ if eq $key "Error" }}
+     <p> {{  $value  }} <p>
+  {{ end }}
+{{ end }}
+    </div>
+ </body>
+</html>

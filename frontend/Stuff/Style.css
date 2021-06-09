@@ -1,0 +1,177 @@
+/* {{define "StyleCSS"}}
+<style> */
+
+body {
+  margin: 0;
+  align-items: center;
+}
+a,
+img,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0px;
+  padding: 0px;
+}
+
+/* standand header every page */
+.MainBar {
+  color: #eaf6f6;
+  background-color: #66bfbf;
+  width: 100%;
+  height: 38px;
+  position: relative;
+}
+
+.MainBar > div {
+  width: fit-content;
+  position: absolute;
+  bottom: 1px;
+}
+
+/* standand footer every page */
+div.footer {
+  color: #eaf6f6;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+.footer div > h4 {
+  color: 66bfbf;
+}
+.footer table {
+  background-color: #66bfbf;
+  table-layout: fixed;
+  width: 100%;
+  text-align: center;
+}
+
+/* mainpage */
+div.mdisplay {
+  border-color: #66bfbf;
+  border-style: solid;
+  border-width: 1px;
+  height: 450px;
+  overflow: hidden;
+}
+
+/* bookcar car picture layout */
+div.display {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+  height: fit-content;
+}
+
+.display > div {
+  margin: 5px;
+  border: 1px solid #66bfbf;
+  width: 180px;
+  overflow: hidden;
+  border-radius: 10%;
+}
+
+.display > div:hover,
+div.mdisplay:hover {
+  background-color: #66bfbf;
+  color: #eaf6f6;
+}
+
+div.display img {
+  width: 100%;
+  height: auto;
+}
+
+.displayText {
+  width: 100%;
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+}
+
+/* data input page */
+h3.Application,
+h4.Application {
+  width: fit-content;
+  margin: 0% auto;
+  margin-top: 5%;
+}
+div.Application {
+  width: 200pt;
+  margin: 0% auto;
+  margin-top: 20pt;
+  margin-bottom: 2;
+}
+input.Application,
+div.Application > input {
+  background-color: #eaf6f6;
+  border-color: #66bfbf;
+  color: #66bfbf;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-left: 5%;
+}
+input.Application:hover,
+div.Application > input:hover {
+  background-color: #66bfbf;
+  border-color: #eaf6f6;
+  color: #eaf6f6;
+  font-weight: bold;
+}
+
+input.InApplication {
+  border-inline-color: none;
+  border-style: solid;
+  border-color: #66bfbf;
+  border-width: 1.5px;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+}
+input.InApplication:focus {
+  outline: none;
+  background: transparent;
+}
+/* div.InApplication {
+  border: solid;
+  border-color: #66bfbf;
+  overflow: hidden;
+  border-width: 1.5px;
+  padding: 0;
+  margin-left: 5%;
+  width: 90%;
+} */
+
+div.ViewBookings {
+  width: 95%;
+  margin: 0 auto;
+  margin-top: 15px;
+  padding-top: 5px;
+}
+
+.ViewBookings table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.ViewBookings td {
+  padding-top: 5px;
+}
+
+.ViewBookings tr:nth-child(even) {
+  background-color: #eaf6f6;
+}
+
+a {
+  color: #2541b2;
+  text-decoration: none;
+}
+
+/* </style>
+{{end}} */

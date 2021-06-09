@@ -1,0 +1,14 @@
+{{ define "prinavbar" }}
+<br />
+  <div class="container">
+    <nav>
+      {{ .UserName }}
+      {{ if .Since }}
+          connected since {{ .Since }}
+      {{end}}
+      <a href="/view_points" class="navpadding">View My Reward Points</a>
+      <a href="/logout" class="navpadding">Sign out</a>&nbsp;&nbsp;
+    <nav>
+  </div>
+  <br />
+{{ end }}
