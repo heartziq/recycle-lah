@@ -18,23 +18,46 @@ import (
 //  call validateUser() to perform the authentication
 //  if authenticated, page would be redirected to staffmenu
 func login(w http.ResponseWriter, r *http.Request) {
-	var data map[string]interface{}
-	data = make(map[string]interface{})
+	Data := struct {
+		PageName  string
+		UserName  string
+		MsgToUser string
+	}{PageName: "Log In"}
+
+	var data map[string]string
+	data = make(map[string]string)
 	if r.Method == http.MethodPost {
 		validateUser(w, r, data)
-		_, foundErr := data["Error"]
 		_, foundMsg := data["Message"]
+		if foundMsg {
+			Data.MsgToUser = data["Error"]
+		}
+		_, foundErr := data["Error"]
+		if foundErr {
+			Data.MsgToUser = Data.MsgToUser + ", " + data["Error"]
+		}
 		if !foundErr && !foundMsg {
 			http.Redirect(w, r, "welcome", http.StatusFound)
 			return
 		}
 	}
+	// executeTemplate(w, "Login.gohtml", Data)
+	// if r.Method == http.MethodPost {
+	// 	validateUser(w, r, data)
+	// 	_, foundErr := data["Error"]
+	// 	_, foundMsg := data["Message"]
+	// 	if !foundErr && !foundMsg {
+	// 		http.Redirect(w, r, "welcome", http.StatusFound)
+	// 		return
+	// 	}
+	// }
 	executeTemplate(w, "login_sook.gohtml", data)
+
 }
 
 func collectorLogin(w http.ResponseWriter, r *http.Request) {
-	var data map[string]interface{}
-	data = make(map[string]interface{})
+	var data map[string]string
+	data = make(map[string]string)
 	if r.Method == http.MethodPost {
 		validateUser(w, r, data)
 		_, foundErr := data["Error"]
@@ -51,9 +74,10 @@ func collectorLogin(w http.ResponseWriter, r *http.Request) {
 // only authenticated user has access to this page
 func welcome(w http.ResponseWriter, r *http.Request) {
 	data := struct {
-		UserName string
-		Since    string
-		Token    string
+		UserName  string
+		Since     string
+		Token     string
+		Collector string
 	}{}
 	user, err := getSession(r)
 	if err != nil {
@@ -64,6 +88,9 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	data.UserName = user.userName
 	data.Since = string(time.Unix(user.sessionCreatedTime, 0).String()[0:19])
 	data.Token = user.token
+	if user.isCollector {
+		data.Collector = "Y"
+	}
 	executeTemplate(w, "welcome.gohtml", data)
 }
 
@@ -91,7 +118,7 @@ func collectorWelcome(w http.ResponseWriter, r *http.Request) {
 // redirect to index page
 // to use SinYaw's logOut
 func logout(w http.ResponseWriter, r *http.Request) {
-	// p("in logout")
+	errlog.Trace.Println("in logout")
 	clearSession(w, r)
 	http.Redirect(w, r, "/", http.StatusFound)
 
@@ -101,7 +128,8 @@ func logout(w http.ResponseWriter, r *http.Request) {
 //  set session cookie if not found
 //  authenticate user and add session id and user access to session map
 //  route to staffmenu when verified
-func validateUser(w http.ResponseWriter, r *http.Request, data map[string]interface{}) {
+// func validateUser(w http.ResponseWriter, r *http.Request, data map[string]interface{}) {
+func validateUser(w http.ResponseWriter, r *http.Request, data map[string]string) {
 	// process submitted form
 	// data = make(map[string]interface{})
 	if r.Method != http.MethodPost {
@@ -115,14 +143,14 @@ func validateUser(w http.ResponseWriter, r *http.Request, data map[string]interf
 	}
 	//  get data from form
 	userId := r.FormValue("userid")
-	password := r.FormValue("pwd")
+	password := r.FormValue("password")
 	data["UserName"] = userId
 	err = checkInputUserName(userId)
-	var msg []string
+	// var msg []string
 	if err != nil {
 
-		msg = append(msg, err.Error())
-		data["Message"] = msg
+		// msg = append(msg, err.Error())
+		data["Message"] = err.Error()
 		errlog.Trace.Println("validateUser", data)
 		return
 	}
@@ -131,8 +159,8 @@ func validateUser(w http.ResponseWriter, r *http.Request, data map[string]interf
 	apiResp, err := verifyUser(userId, reqData)
 	if err != nil {
 
-		msg = append(msg, err.Error())
-		data["Message"] = msg
+		// msg = append(msg, err.Error())
+		data["Message"] = err.Error()
 		errlog.Trace.Println("validateUser", data)
 		return
 	}

@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"frontend/errlog"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -105,62 +107,6 @@ func newUser(res http.ResponseWriter, req *http.Request) {
 	}
 
 }
-
-// func newUser(res http.ResponseWriter, req *http.Request) {
-
-// 	Data := struct {
-// 		PageName  string
-// 		UserName  string
-// 		MsgToUser string
-// 	}{PageName: "New User Registration", UserName: ""}
-// 	tpl.ExecuteTemplate(res, "RL_NewUser.gohtml", Data)
-
-// 	//this struct is to store into DB
-
-// 	// var currentUser user
-// 	if req.Method == http.MethodPost {
-// 		//---save user's information in the map ---
-// 		username := req.FormValue("username")
-// 		password := req.FormValue("password")
-// 		confirmpassword := req.FormValue("confirmpassword")
-// 		email := req.FormValue("email")
-// 		C_Bool := req.FormValue("collector")
-// 		var Collector bool
-// 		if C_Bool == "true" {
-// 			Collector = true
-// 		} else {
-// 			Collector = false
-// 		}
-// 		_, nameFound := matchPassword[email] //**need to get from database
-// 		UFok := isEmailValid(email)
-// 		if !nameFound && password == confirmpassword && UFok {
-// 			// fmt.Println("Htmlmain.newUser - no same name in existing data")
-// 			id := uuid.NewV4().String()
-// 			setCookie(res, id)
-// 			ToDB := nUser{username, email, password, id, Collector}
-// 			log.Println(ToDB, confirmpassword)
-// 			registeration(ToDB)             // send data to server
-// 			matchPassword[email] = password //**temporary use
-// 			mapSessions[id] = email
-// 			mapUsers[email] = user{username, id}
-// 			Data.MsgToUser = "New User Registration Done! You may process to log in."
-// 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
-// 		} else if !UFok {
-// 			// fmt.Println("Htmlmain.newUser - email format not correct")
-// 			Data.MsgToUser = "Please enter correct email!"
-// 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
-// 		} else if nameFound {
-// 			// fmt.Println("Htmlmain.newUser - name in existing data")
-// 			fmt.Scanf(Data.MsgToUser, "Please use other email! '%v' has been taken!", email)
-// 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
-// 		} else if password != confirmpassword {
-// 			// fmt.Println("Htmlmain.newUser - confirm password not match")
-// 			Data.MsgToUser = "Confirm Password is not same!"
-// 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
-// 		}
-// 	}
-
-// }
 
 //log in
 // sooK modified
@@ -285,7 +231,7 @@ func logOut(res http.ResponseWriter, req *http.Request) {
 
 //Web Sub Pages func start from below---------------------------------------------------------------------------//
 
-//Book A Car
+//PickUp
 func pickUp(res http.ResponseWriter, req *http.Request) {
 
 	Data := struct {
@@ -333,31 +279,42 @@ func viewStatus(res http.ResponseWriter, req *http.Request) {
 // June 08 updated by Sook - commented line
 // mapUsers[email] = user{newusername, mapUsers[email].Key}
 func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
-
+	errlog.Trace.Println("userDetailUpdate")
 	Data := struct {
 		PageName  string
 		UserName  string
 		MsgToUser string
 	}{PageName: "Updated Password"}
 
-	myCookie, err := req.Cookie("CRA")
-	if err != nil {
-		http.Redirect(res, req, "/logIn", http.StatusSeeOther)
-	} else {
-		Data.UserName = mapSessions[myCookie.Value]
-	}
+	// myCookie, err := req.Cookie("recyclelah")
+	// if err != nil {
+	// 	http.Redirect(res, req, "/logIn", http.StatusSeeOther)
+	// } else {
+	// 	Data.UserName = mapSessions[myCookie.Value]
+	// }
 	if req.Method == http.MethodPost {
 		//get user name and current password
-		email := req.FormValue("email")
+		userId := req.FormValue("userid")
 		password := req.FormValue("oldpassword")
 		//get user new password and confirm the new password
 		newusername := req.FormValue("newusername")
 		newpassword := req.FormValue("newpassword")
 		confirmpassword := req.FormValue("confirmpassword")
 
-		pw, mOk := matchPassword[email] //**need to modify
-		log.Println(pw, mOk, password == pw)
-		if !mOk || !(password == pw) { //**need to modify
+		errlog.Trace.Println("Ken In Value=", userId, password, newusername, newpassword, confirmpassword)
+
+		var reqData UserVerification
+		reqData.Password = password
+		apiResp, err := verifyUser(userId, reqData)
+		if err != nil {
+			Data.MsgToUser = err.Error()
+			errlog.Trace.Println("validateUser", err)
+			return
+		}
+
+		errlog.Trace.Println("Ken In Value=", apiResp)
+
+		if !apiResp.Success {
 			Data.MsgToUser = "The user name and password is not match! "
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
@@ -365,14 +322,20 @@ func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
 			Data.MsgToUser = "New password and confrim password is not same!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
-		} else if email == "" || password == "" {
-			Data.MsgToUser = "Please insert username and password for verification!"
+		} else if userId == "" || password == "" {
+			Data.MsgToUser = "Please insert user id and password for verification!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 		} else {
 			//start update DB
-			log.Println(email, password, newpassword, confirmpassword, newusername)
+			var user NewUser
+			user.UserName = newusername
+			user.Password = newpassword
+
+			id := userId
+			// log.Println(email, password, newpassword, confirmpassword, newusername)
+			changeUser(user, id, password)
 			// SOOKMODIFIED mapUsers[email] = user{newusername, mapUsers[email].Key}
-			matchPassword[email] = newpassword
+			// matchPassword[email] = newpassword
 			//end update DB
 			Data.MsgToUser = "Detail is updated!"
 			defer fmt.Fprintf(res, "<h4 class='Application'><a href='/menu'>Main Menu</a></h4><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
@@ -403,33 +366,49 @@ func isEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-const baseURL = "http://localhost:5000/api/v1"
+func changeUser(user NewUser, id string, oldpassword string) error {
+	errlog.Trace.Println("checgeUser: ")
+	jsonValue, err := json.Marshal(user)
+	if err != nil {
+		errlog.Error.Println("error in marshal", err)
+		return err
+	}
 
-func registration(user nUser) {
-	log.Println("registeration")
-
-	log.Println(user)
-	jsonValue, _ := json.Marshal(user)
-	http.Post(baseURL+"/"+"registration", "application/json", bytes.NewBuffer(jsonValue))
-
-	// response.Header.Set("Content-Type", "application/json")
-
+	// response, err := client.Post(config.BaseURL+"/"+code+"?key="+config.APIKey,
+	// "application/json", bytes.NewBuffer(jsonValue))
 	// if err != nil {
-	// 	fmt.Printf("The HTTP request failed with error %s\n", err)
-	// } else {
-	// 	ky, _ := ioutil.ReadAll(response.Body)
-	// 	response.Body.Close()
-	// 	if len(string(ky)) == 36 {
-	// 		key = string(ky)
-	// 		fmt.Println("Please copy and keep your \"Key\" safe!\nKey: " + string(ky))
-	// 		localKeyRecord(key)
-	// 		// data := map[string]string{"key": string(ky), "date": time.Now().Format("2006-01-02")}
-	// 		// jv, _ := json.Marshal(data)
-	// 		// err := ioutil.WriteFile("Key", jv, 0644)
-	// 		// if err != nil {
-	// 		// 	fmt.Println(err)
-	// 		// }
-	// 	}
-	// 	userInput()
+	// 	errlog.Trace.Println(err)
+	// 	return err
 	// }
+
+	url := "http://localhost:5000/api/v1/users/" + id + "?key=secretkey"
+	client := &http.Client{}
+	request, err := http.NewRequest(http.MethodPut, url,
+		bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+	errlog.Trace.Printf("put REQUEST=%v\n", request)
+	response, err := client.Do(request)
+	if err != nil {
+		errlog.Error.Printf("The HTTP request failed with error %s\n", err)
+		return err
+	}
+	data, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
+	if err != nil {
+		errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, err.Error())
+		return err
+	}
+	errlog.Trace.Printf("response status code:%+v\nstring(data):%+v\n", response.StatusCode, string(data))
+	var rsp Response
+	if err := json.Unmarshal(data, &rsp); err != nil {
+		errlog.Error.Println("unmarshal error", err)
+		return err
+	} else {
+		errlog.Info.Println("response body (unmarshal)=", rsp)
+		if rsp.Success {
+			return nil
+		}
+		return errors.New(rsp.Message)
+
+	}
 }

@@ -127,6 +127,8 @@ func setupHandles() {
 	http.HandleFunc("/logout", httpLog(logout))
 	// reward points
 	http.HandleFunc("/view_points", httpLog(checkUserAccess(viewPoints)))
+	// user request for pick up
+	http.HandleFunc("/user_pickup_list", httpLog(checkUserAccess(userPickupList)))
 	//Main Pages
 	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
 	http.HandleFunc("/menu", mainMenu)
@@ -135,7 +137,7 @@ func setupHandles() {
 	// http.HandleFunc("/logout", logOut)
 	http.HandleFunc("/login", logIn)
 	// //Sub Pages
-	// http.HandleFunc("/userupdate", userDetailUpdate)
+	http.HandleFunc("/userupdate", userDetailUpdate)
 	// http.HandleFunc("/pickup", pickUp)
 	// http.HandleFunc("/viewstatus", viewStatus)
 	//Load Files

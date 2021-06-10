@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" }}
+  {{ template "prinavbar" . }}
+<body>
+<h2>My Pickup Requests</h2>
+
+<table>
+    <caption>Pickup Request</caption>
+    <tr>
+         <th>Requested Date</th>
+        <th>Description</th>
+         <th>Weight</th>
+         <th> Status</th>
+    </tr>
+{{ range . }}
+     <tr>
+         <td>{{ if .Id }}
+                      {{ .Id }}
+               {{ end }}
+         </td>
+         <td>{{ if .FamilyName }}
+                      {{ .FamilyName }}
+             {{ end }}
+         </td>
+         <td>{{ if .FirstName }}
+                      {{ .FirstName }}
+             {{ end }}
+         </td>
+         <td>{{ if .ContactNum }}
+                      {{ .ContactNum }}
+             {{ end }}
+         </td>
+         <td>{{ if .DateOfBirth }}
+                      {{ .DateOfBirth  | fShortDate  }}
+             {{ end }}
+         </td>
+    </tr>
+{{ end }}
+</table>
+<br />
+
+<!--
+Another way 2
+{{ range $key, $value := . }}
+<h3> {{ $key }}</h3>
+<p>{{ $value }}</p>
+{{ end }}
+<br />
+Another Way 3
+{{ range . }} {{ . }} <br /> {{ end }}
+<br />
+Another way 4
+{{ range . }}
+
+{{ if .FamilyName }}
+   FamilyName: {{ .FamilyName}}
+{{ end }}
+<br />
+{{ end }}
+Another way 5
+-->
+</body>
+</html>

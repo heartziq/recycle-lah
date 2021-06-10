@@ -87,7 +87,12 @@ func (p *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 			// w.WriteHeader(http.StatusOK)
 			// w.Write([]byte("DELETE: mark user record as deleted"))
-
+		case "PUT":
+			errlog.Trace.Println("user PUT ")
+			p.methodPutUser(w, r, id, reqBody)
+			return
+			// w.WriteHeader(http.StatusOK)
+			// w.Write([]byte("POST: create user in package userhandler"))
 		case "POST":
 			errlog.Trace.Println("user POST ")
 			p.methodPostUser(w, r, id, reqBody)

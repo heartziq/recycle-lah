@@ -2,11 +2,23 @@
 <html lang="en">
 {{ template "header" }}
 <body>
-  {{ template "prinavbar" . }}
+    {{ if eq .Collector "Y" }}
+       I am a collector
+               {{ template "col_prinavbar" . }}
+     {{ else }}
+       I am a user (not a collector)
+        {{ template "prinavbar" . }} 
+    {{ end }}
+
   <div class="container">
-    <h1>Welcome<h1>
+    <h1>Hello <h1>
+    {{ if .UserName }}
+        {{ .UserName }}
+    {{ end }}
+
     <br />
-    {{ if .Token }}
+<br />
+     {{ if .Token }}
        Token = {{ .Token }}
     {{ end }}
     <br />

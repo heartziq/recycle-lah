@@ -172,10 +172,10 @@ func getSession(r *http.Request) (user, error) {
 
 // clears session details
 func clearSession(w http.ResponseWriter, r *http.Request) {
-
+	errlog.Trace.Println("going to get Cookie")
 	cookie, err := r.Cookie("RecycleLah")
 	if err != nil {
-		errlog.Trace.Println(err)
+		errlog.Trace.Println("getting cookie:", err)
 		if err == http.ErrNoCookie {
 			errlog.Error.Println("RecycleLah not found when logout", err)
 			return

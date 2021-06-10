@@ -22,7 +22,7 @@ var (
 		created_by, attend_by,
 		completed
 		
-		FROM your_db.pickups
+		FROM pickups
 		WHERE attend_by='';`,
 		"GetPickupInProgress": `
 		SELECT 
@@ -31,7 +31,7 @@ var (
 		created_by, attend_by,
 		completed
 		
-		FROM your_db.pickups
+		FROM pickups
 		WHERE created_by=?
         AND attend_by!='';`,
 		"PickIAccept": `
@@ -41,7 +41,7 @@ var (
 		created_by, attend_by,
 		completed
 		
-		FROM your_db.pickups
+		FROM pickups
 
 		WHERE attend_by=? AND completed=false;
 		`,
