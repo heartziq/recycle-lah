@@ -83,7 +83,7 @@ func VerifyHdrToken(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		http.Error(w, "Forbidden Access - Invalid API_KEY provided", http.StatusUnauthorized) // 401
+		http.Error(w, "Forbidden Access - Invalid TOKEN provided", http.StatusUnauthorized) // 401
 	})
 
 	return newHandlerFunc

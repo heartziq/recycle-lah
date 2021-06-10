@@ -58,6 +58,7 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data1, err := ioutil.ReadAll(response.Body)
+	errlog.Trace.Println("data1=", data1)
 	defer response.Body.Close()
 	if err != nil {
 		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())

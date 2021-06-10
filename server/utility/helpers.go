@@ -2,6 +2,7 @@ package utility
 
 import (
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -122,9 +123,36 @@ func HashPassword(password string) []byte {
 	}
 }
 
-// func ErrorResponse(w http.ResponseWriter, message string) {
-// 	Trace.Printf("response=:%+v\n", message)
-// 	w.Header().Set("Content-Type", "application/json")
-// 	rsp.Timestamp = int(time.Now().Unix())
-// 	json.NewEncoder(w).Encode(rsp)
-// }
+// not working
+func GetUserId(r *http.Request) (string, error) {
+	Trace.Println("============ get user id  =====================")
+	tokenString := r.Header.Get("Authorization")
+	Trace.Println("Token=", tokenString)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(KEY), nil
+	})
+
+	if err != nil {
+
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+				// Token has expired
+				log.Println("token expired")
+				return "", errors.New("token expired")
+			}
+		}
+
+		log.Println("invalid token")
+		return "", errors.New("invalid token")
+
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		Info.Printf("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
+		Info.Println("Token is valid.")
+		// userId := fmt.Sprintf(claims["aud"])  //  stuck - do not how to convert to string
+		return "sook6666", nil
+	}
+
+	return "", errors.New("error getting userid from token")
+}

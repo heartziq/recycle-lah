@@ -1,5 +1,7 @@
 package handlers
 
+// this code has been modified by SOOK for testing purposes
+// ********************************************************
 import (
 	"database/sql"
 	"encoding/json"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	errlog "github.com/heartziq/recycle-lah/server/utility"
 )
 
 var (
@@ -175,9 +178,11 @@ func (p *PickupHandler) approvePickup(pickup_id string) error {
 }
 
 func (p *PickupHandler) showPickupInProgress(user_id string) (users []*pickup) {
+	errlog.Trace.Println("showPickupInProgress userid=", user_id)
 	// access db
-	results, err := p.Db.Query(DBQuery["GetPickupInProgress"], user_id)
 
+	// results, err := p.Db.Query(DBQuery["GetAllPickups"])
+	results, err := p.Db.Query(DBQuery["GetPickupInProgress"], user_id)
 	if err != nil {
 
 		panic(err.Error())
@@ -196,13 +201,15 @@ func (p *PickupHandler) showPickupInProgress(user_id string) (users []*pickup) {
 		)
 
 		if err != nil {
-
+			errlog.Error.Println(err)
 			panic(err.Error())
 
 		}
+		errlog.Trace.Println("showPickupInProgress next c:", c)
 		users = append(users, &c)
 
 	}
+	errlog.Trace.Println("before return showPickupInProgress next c:")
 	return
 }
 
@@ -265,9 +272,16 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if role == "user" {
 		switch r.Method {
 		case "GET": // Show MY pickup in-progress
-			result := p.showPickupInProgress("12345") // replace "12345" with user_id
+
+			result := p.showPickupInProgress("SOOK6666") // replace "12345" with user_id
 			w.WriteHeader(http.StatusAccepted)
+			errlog.Trace.Printf("result=[%v], &result=[%v]\n", result, &result)
+			for _, v := range result {
+				errlog.Trace.Printf("&v=[%v], *v=[%v]\n", &v, *v)
+			}
+
 			json.NewEncoder(w).Encode(result)
+			return // return added by Sook
 		case "POST": // Request for pickup (status, desc and weight_range, creation_date, updated_date)
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err != nil {
