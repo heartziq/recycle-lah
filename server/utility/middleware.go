@@ -1,7 +1,9 @@
 package utility
 
 import (
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -35,5 +37,41 @@ func AddAuthHeader(next http.Handler) http.Handler {
 
 		r.Header.Set("Authorization", "Bearer somerandomtokenstring")
 		next.ServeHTTP(w, r)
+	})
+}
+
+func ValidateJWTToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// Reject anything other than Bearer
+		// expect var 'mechanism' to be []string{"Bearer", "TOKEN_STRING"}
+		mechanism := strings.Split(r.Header.Get("Authorization"), " ")
+		if len(mechanism) > 1 && mechanism[0] == "Bearer" {
+			if token := mechanism[1]; token != "" {
+
+				// validate token
+				if _, err := VerifyToken(token); err != nil {
+					log.Printf("Validate token err: %v\n", err.Error())
+					if err.Error() == "token expired" {
+						http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
+						return
+					}
+
+					http.Error(w, "Invalid Token - Authorization Failed", http.StatusUnauthorized)
+
+					return
+
+				}
+
+				next.ServeHTTP(w, r)
+				return
+
+			}
+
+		}
+
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 - Status Unauthorized"))
+
 	})
 }
