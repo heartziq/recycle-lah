@@ -1,46 +1,53 @@
 <!doctype html>
 <html lang="en">
+
 {{ template "header" }}
-  {{ template "prinavbar" . }}
+
 <body>
-<h2>My Pickup Requests</h2>
+    {{template "BodyTitle" .}}
+    <br>
+    <h3>My Pickup Requests</h3>
+    <div class="ViewBookings">
+        <table>
+            <tr>
+                <th>Id</th>
+                <th>Lat</th>
+                <th>Lng</th>
+                <th>Address</th>
+                <th>CreatedBy</th>
+                <th>Collector</th>
+                <th>Completed</th>
+            </tr>
+            {{ range $v := .PickupList }}
+            <tr>
+                <td>
+                    {{ $v.Id}}
+                </td>
+                <td>
+                    {{ $v.Lat }}
+                </td>
+                <td>
+                    {{ $v.Lng }}
+                </td>
+                <td>
+                    {{ $v.Address }}
+                </td>
+                <td>
+                    {{ $v.CreatedBy }}
+                </td>
+                <td>
+                    {{ $v.Collector }}
+                </td>
+                <td>
+                    {{ $v.Completed }}
+                </td>
+            </tr>
+            {{ end }}
+        </table>
+    </div>
+    <br />
 
-<table>
-    <caption>Pickup Request</caption>
-    <tr>
-         <th>Requested Date</th>
-        <th>Description</th>
-         <th>Weight</th>
-         <th> Status</th>
-    </tr>
-{{ range . }}
-     <tr>
-         <td>{{ if .Id }}
-                      {{ .Id }}
-               {{ end }}
-         </td>
-         <td>{{ if .FamilyName }}
-                      {{ .FamilyName }}
-             {{ end }}
-         </td>
-         <td>{{ if .FirstName }}
-                      {{ .FirstName }}
-             {{ end }}
-         </td>
-         <td>{{ if .ContactNum }}
-                      {{ .ContactNum }}
-             {{ end }}
-         </td>
-         <td>{{ if .DateOfBirth }}
-                      {{ .DateOfBirth  | fShortDate  }}
-             {{ end }}
-         </td>
-    </tr>
-{{ end }}
-</table>
-<br />
-
-<!--
+    <!--
 Another way 2
 {{ range $key, $value := . }}
 <h3> {{ $key }}</h3>
@@ -61,4 +68,5 @@ Another way 4
 Another way 5
 -->
 </body>
+
 </html>

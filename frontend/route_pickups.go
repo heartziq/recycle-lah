@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 
 	"frontend/errlog"
 )
@@ -17,9 +21,15 @@ type pickup struct {
 	Completed bool    `json:"completed"`
 }
 
-// curl -X GET http://localhost:5000/api/v1/rewards/USER1234?key=secretkey
 func userPickupList(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("\n\n***userPickupList***")
+
+	data := struct {
+		PageName   string
+		UserName   string
+		PickupList []pickup
+		MsgToUser  string
+	}{PageName: "Requested List"}
 
 	//  get data from session
 
@@ -38,16 +48,6 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		url = url + "user"
 	}
 
-	/*
-		apiReq, err := http.NewRequest("GET", url, nil)
-		// bearer := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyMTIzNCIsImV4cCI6MTYyMzQ3NTMwMywiaXNzIjoidGVzdCJ9.USu2NiQ9vcWHGCeV2m1JhZ23P6r5yCL7UY-m-zeVLBg"
-		bearer := sess.token
-		apiReq.Header.Add("Authorization", bearer)
-		apiReq.Header.Set("Content-Type", "application/json")
-		client := &http.Client{}
-		errlog.Trace.Println("apiReq=", apiReq)
-		response, err := client.Do(apiReq)
-	*/
 	client := &http.Client{}
 	errlog.Trace.Println("url=", url)
 	response, err := client.Get(url)
@@ -57,7 +57,10 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		message(w, r)
 		return
 	}
+
+	data.UserName = sess.userName
 	data1, err := ioutil.ReadAll(response.Body)
+
 	errlog.Trace.Println("data1=", data1)
 	defer response.Body.Close()
 	if err != nil {
@@ -66,30 +69,103 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		message(w, r)
 		return
 	}
-	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
-	// var rsp RewardPointsResponse
-	// // var pickupList []pickup
-	// if err := json.Unmarshal(data1, &rsp); err != nil {
-	// 	errlog.Error.Println("unmarshal error", err)
-	// 	setFlashCookie(w, "Applicatin error (500)")
-	// 	message(w, r)
-	// 	return
-	// } else {
-	// 	errlog.Info.Println("response body (unmarshal)=", rsp)
-	// 	if !rsp.Success {
-	// 		errlog.Error.Println("api returns false", err)
-	// 		setFlashCookie(w, rsp.Message)
-	// 		message(w, r)
-	// 		return
-	// 	}
-	// 	data := struct {
-	// 		UserName     string
-	// 		Since        string
-	// 		RewardPoints int
-	// 		Token        string
-	// 	}{}
-	// 	data.RewardPoints = rsp.Points
-	executeTemplate(w, "user_pickup_list.gohtml", nil)
-	return
+	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+	json.Unmarshal(data1, &data.PickupList)
+	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
+
+	executeTemplate(w, "user_pickup_list.gohtml", data)
 	// }
+}
+
+func requestPickup(w http.ResponseWriter, r *http.Request) {
+	errlog.Trace.Println("\n\n***requestPickup***")
+	data := struct {
+		PageName  string
+		UserName  string
+		newOrder  pickup
+		MsgToUser string
+	}{PageName: "Request Pickup Order"}
+	if r.Method == http.MethodPost {
+
+		sess, err := getSession(r)
+		errlog.Trace.Println(sess)
+		if err != nil {
+			errlog.Error.Println("error getting session")
+			return
+		}
+
+		data.UserName = sess.userName
+
+		//  get data from form
+		dt := time.Now()
+		hr, mi, se := dt.Clock()
+		y, m, d := dt.Date()
+		ID := int(y) + int(m) + d + hr + mi + se
+		data.newOrder.Id = sess.userId + "pickup_" + strconv.Itoa(ID)
+		data.newOrder.CreatedBy = sess.userId
+		errlog.Error.Println("data: ", data)
+
+		description := r.FormValue("description")
+		weight_range := r.FormValue("weightrange")
+		data.newOrder.Address = r.FormValue("address")
+		// data.newOrder.Collector := r.FormValue("collector")
+		// data.newOrder.Completed := r.FormValue("completed")
+		postCode := r.FormValue("postcode")
+		// to get coordinates of a post code
+		lat, lng := getCoordinate(postCode)
+		data.newOrder.Lat = lat
+		data.newOrder.Lng = lng
+		errlog.Trace.Println("Html Form :", data.newOrder, description, weight_range)
+
+		url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role="
+		if sess.isCollector {
+			url = url + "collector"
+		} else {
+			url = url + "user"
+		}
+
+		jsonValue, err := json.Marshal(data.newOrder)
+		if err != nil {
+			errlog.Error.Println("error in marshal", err)
+			return
+		}
+
+		client := &http.Client{}
+		errlog.Trace.Println("url=", url)
+		response, err := client.Post(url, "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			errlog.Error.Println("client.Post")
+			setFlashCookie(w, "Applicatin error (500)")
+			message(w, r)
+			return
+		}
+		data1, _ := ioutil.ReadAll(response.Body)
+		defer response.Body.Close()
+		errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+		errlog.Trace.Println("response.Header=", response.Header)
+		errlog.Trace.Println("response.Body=", string(data1))
+		if string(data1) == "inserted" {
+			// message to Sin Yaw: if inserted means successful, can show message to say successful or just redirect baco to main menu
+			http.Redirect(w, r, "welcome", http.StatusFound)
+			return
+		}
+		//  if successful - should do a redirect
+	} //  if Post
+	executeTemplate(w, "user_requested_form.gohtml", data)
+}
+
+func getCoordinate(postCode string) (lat float64, lng float64) {
+	if postCode == "" {
+		return 1.33221, 103.77466 //  599489 Ngee Ann Poly
+	}
+	if len(postCode) < 3 {
+		return 1.33221, 103.77466 //  599489 Ngee Ann Poly
+	}
+	if postCode[0:3] == "560" { // amk hub 569933
+		return 1.36974, 103.84873
+	}
+	if postCode[0:3] == "310" { // toa payoh 310480 toa payoh hub
+		return 1.33458, 103.84903
+	}
+	return 1.33221, 103.77466 //  599489 Ngee Ann Poly
 }

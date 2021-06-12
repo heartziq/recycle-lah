@@ -114,7 +114,7 @@ func main() {
 // 	http.HandleFunc("/collector_welcome", httpLog(checkCollectorAccess(collectorWelcome)))
 // }
 
-func setupHandles() {
+func x1setupHandles() {
 	// Sook
 	http.HandleFunc("/", httpLog(index))
 	// Sook - create new account
@@ -123,12 +123,45 @@ func setupHandles() {
 	// Sook - login/logout
 	http.HandleFunc("/signin", httpLog(httpLog(login)))
 
-	http.HandleFunc("/welcome", httpLog(checkUserAccess(welcome)))
+	http.HandleFunc("/welcome", httpLog(checkAccess(welcome)))
 	http.HandleFunc("/logout", httpLog(logout))
 	// reward points
-	http.HandleFunc("/view_points", httpLog(checkUserAccess(viewPoints)))
+	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
 	// user request for pick up
-	http.HandleFunc("/user_pickup_list", httpLog(checkUserAccess(userPickupList)))
+	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
+	//Main Pages
+	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
+	http.HandleFunc("/menu", mainMenu)
+	http.HandleFunc("/newuser", httpLog(newUser))
+
+	// http.HandleFunc("/logout", logOut)
+	http.HandleFunc("/login", logIn)
+	// //Sub Pages
+	http.HandleFunc("/userupdate", userDetailUpdate)
+
+	// added by Sook 12 June
+	http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
+
+}
+
+func setupHandles() {
+	// Sook for testing only
+	http.HandleFunc("/index_sook", httpLog(indexSook))
+
+	http.HandleFunc("/", httpLog(index))
+	// Sook - create new account
+	http.HandleFunc("/newusersook", httpLog(httpLog(createAccount)))
+	http.HandleFunc("/signupsuccess", httpLog(httpLog(signUpSuccess)))
+	// Sook - login/logout
+	http.HandleFunc("/signin", httpLog(httpLog(login)))
+
+	http.HandleFunc("/welcome", httpLog(checkAccess(welcome)))
+	http.HandleFunc("/logout", httpLog(logout))
+	// reward points
+	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
+	http.HandleFunc("/request_pickup", requestPickup)
+	// user request for pick up
+	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
 	//Main Pages
 	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
 	http.HandleFunc("/menu", mainMenu)
@@ -140,9 +173,15 @@ func setupHandles() {
 	http.HandleFunc("/userupdate", userDetailUpdate)
 	// http.HandleFunc("/pickup", pickUp)
 	// http.HandleFunc("/viewstatus", viewStatus)
-	//Load Files
-	// http.Handle("/Pictures/", http.StripPrefix("/Pictures", http.FileServer(http.Dir("Pictures"))))
-	// http.Handle("/Stuff/", http.StripPrefix("/Stuff", http.FileServer(http.Dir("Stuff"))))
-	//run server
+	// added by Sook 12 June
+	http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
 
+	// recycle Bin
+	// recycleIndex
+	http.HandleFunc("/indexBin", IndexBin)
+	http.HandleFunc("/recyclebinsFB", recycleBinFB)
+	// Get user query pass feedback
+	http.HandleFunc("/queryFB", queryFB)
+	// show ALL recyclebins and FeedBack.
+	http.HandleFunc("/showrecyclebins", showRecycleBins)
 }

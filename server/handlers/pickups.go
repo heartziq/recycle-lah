@@ -133,7 +133,7 @@ func (p *PickupHandler) ShowPickup() http.HandlerFunc {
 func (p *PickupHandler) requestPickup(pu *pickup) error {
 	newPickupId := uuid.NewString()
 
-	query := "INSERT INTO your_db.pickups VALUES (?,POINT(?,?),?,?,?,?)"
+	query := "INSERT INTO pickups VALUES (?,POINT(?,?),?,?,?,?)"
 	result, err := p.
 		Db.
 		Exec(
@@ -147,7 +147,8 @@ func (p *PickupHandler) requestPickup(pu *pickup) error {
 		)
 
 	if err != nil {
-		return errors.New("error inserting into your_db.pickups")
+		errlog.Trace.Println(err)
+		return errors.New("error inserting into pickups")
 	}
 
 	rows, _ := result.RowsAffected()
@@ -156,7 +157,7 @@ func (p *PickupHandler) requestPickup(pu *pickup) error {
 }
 
 func (p *PickupHandler) acceptPickup(pickup_id, collector_id string) error {
-	results, err := p.Db.Exec("UPDATE your_db.pickups SET attend_by=? WHERE id=?;", collector_id, pickup_id)
+	results, err := p.Db.Exec("UPDATE pickups SET attend_by=? WHERE id=?;", collector_id, pickup_id)
 	if err != nil {
 		return errors.New("error updating record")
 	}
@@ -167,7 +168,7 @@ func (p *PickupHandler) acceptPickup(pickup_id, collector_id string) error {
 }
 
 func (p *PickupHandler) approvePickup(pickup_id string) error {
-	results, err := p.Db.Exec("UPDATE your_db.pickups SET completed=? WHERE id=?;", true, pickup_id)
+	results, err := p.Db.Exec("UPDATE pickups SET completed=? WHERE id=?;", true, pickup_id)
 	if err != nil {
 		return errors.New("error updating record")
 	}
@@ -248,7 +249,7 @@ func (p *PickupHandler) showAcceptedPickups(collector_id string) (result []*pick
 }
 
 func (p *PickupHandler) deletePickup(pickup_id string) error {
-	results, err := p.Db.Exec("DELETE FROM your_db.pickups WHERE id=?;", pickup_id)
+	results, err := p.Db.Exec("DELETE FROM pickups WHERE id=?;", pickup_id)
 	if err != nil {
 		return errors.New("Error deleting record")
 	}
@@ -290,8 +291,13 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			newPickup := new(pickup)
-			json.Unmarshal(reqBody, newPickup)
+			err = json.Unmarshal(reqBody, newPickup)
+			if err != nil {
+				log.Printf(err.Error())
+			}
+			log.Printf("reqBody %v\n", string(reqBody))
 			log.Printf("newPickup %v\n", newPickup)
+			// log.Printf("newPickup %v\n", newPickup)
 			if err := p.requestPickup(newPickup); err != nil {
 				log.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)

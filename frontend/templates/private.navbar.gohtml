@@ -1,18 +1,25 @@
 {{ define "prinavbar" }}
-<br />
-  <div class="container">
-    <nav>
-      {{ .UserName }}
-      {{ if .Since }}
-          connected since {{ .Since }}
-      {{end}}
-      <a href="/view_points" class="navpadding">View My Reward Points</a>
-          <a href="/view_points" class="navpadding">Request for Pickup</a>
-          <a href="/user_pickup_list" class="navpadding">View Pickup Requests</a>
-          <a href="/view_points" class="navpadding">Feedback (Lam)</a>
-          <a href="/userupdate" class="navpadding">Update Account</a>
-      <a href="/logout" class="navpadding">Sign out</a>&nbsp;&nbsp;
-    <nav>
-  </div>
-  <br />
+<div class="container">
+  <nav>
+    <div style=" float:left ;width:fit-content;">
+      <h4>
+        <a href="/view_points" class="navpadding">View My Reward Points</a> |
+        <a href="/request_pickup" class="navpadding">Request for Pickup</a> |
+        <a href="/user_pickup_list" class="navpadding">View Pickup Requests</a> |
+        <a href="/view_points" class="navpadding">Feedback (Lam)</a> |
+        <a href="/userupdate" class="navpadding">Update Account</a>
+        <!-- <a href="/logout" class="navpadding">Sign out</a> -->
+        &nbsp;&nbsp;
+      </h4>
+    </div>
+    {{ if .Since }}
+    <div style=" float:right ;width:auto;">
+      <h4>
+        I am a user, connected since {{ .Since }}
+      </h4>
+    </div>
+    {{end}}
+  </nav>
+</div>
+<br>
 {{ end }}

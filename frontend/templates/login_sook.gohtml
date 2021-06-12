@@ -1,39 +1,54 @@
 <!doctype html>
 <html lang="en">
+
 {{ template "header" }}
+
 <body>
- <div class="container">
-<h1>Sign in</h1>
-     <form method="post" >
-      <br>
-       <label for="userid" class="label">User Id </label>
-       <br />
-        <input id="userid" type="text" name="userid" placeholder="userid" required class="input" autofocus>
-        <br>
-        <label for="password" class="label">Password </label>
-        <br />
-        <input id="password" type="password" name="password" placeholder="password" autocomplete="off" class="input" required><br>
-        <br>
-        <input type="submit" class="submit">
+
+  {{template "BodyTitle" .}}
+  <br>
+  <h3 class="Application">Please log in with user id and password!</h3>
+  <div class="Application">
+    <form method="post">
+      <!-- <br>
+      <label for="userid" class="label">User Id </label>
+      <br /> -->
+      <div style="padding-bottom: 19px;">
+        <div class="InApplication">
+          <input class="InApplication" type="text" name="userid" placeholder="userid" required>
+        </div>
+        <!-- <br>
+      <label for="password" class="label">Password </label>
+      <br /> -->
+        <div class="InApplication">
+          <input class="InApplication" type="text" name="password" placeholder="password" required>
+        </div>
+
+      </div>
+      <input class="Application" type="submit">
     </form>
-    <br />
-<br />
-{{ range $key, $value := . }}
+  </div>
+
+  {{ range $key, $value := .Dt }}
   {{ if eq $key "Message" }}
-    <p> {{ $value  }} <p>
-     {{ end }}
-{{ end }}
-{{ range $key, $value := . }}
+  <h4 class="Application"> {{ $value }}</h4>
+  {{ end }}
+  {{ end }}
+
+  {{ range $key, $value := .Dt }}
   {{ if eq $key "Error" }}
-     <p> {{  $value  }} <p>
-     {{ end }}
-{{ end }}
-<br />
-<!--
+  <h4 class="Application"> {{ $value }}</h4>
+  {{ end }}
+  {{ end }}
+
+
+
+  <!--
 <a class="lead pull-right" href="/newuser">Create new Account</a>
     <script src="/static/js/jquery-2.1.1.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     -->
-    </div>
- </body>
+
+</body>
+
 </html>

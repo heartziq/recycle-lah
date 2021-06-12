@@ -1,9 +1,11 @@
 package utility
 
 import (
+	"log"
 	"net/http"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -87,4 +89,80 @@ func VerifyHdrToken(next http.Handler) http.Handler {
 	})
 
 	return newHandlerFunc
+}
+
+func ValidateJWTToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// Reject anything other than Bearer
+		// expect var 'mechanism' to be []string{"Bearer", "TOKEN_STRING"}
+		mechanism := strings.Split(r.Header.Get("Authorization"), " ")
+		if len(mechanism) > 1 && mechanism[0] == "Bearer" {
+			if token := mechanism[1]; token != "" {
+
+				// validate token
+				if _, err := VerifyToken(token); err != nil {
+					log.Printf("Validate token err: %v\n", err.Error())
+					if err.Error() == "token expired" {
+						// http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
+						http.Error(w, err.Error(), http.StatusUnauthorized)
+						return
+					}
+
+					http.Error(w, "Invalid Token - Authorization Failed", http.StatusUnauthorized)
+
+					return
+
+				}
+
+				next.ServeHTTP(w, r)
+				return
+
+			}
+
+		}
+
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 - Status Unauthorized"))
+
+	})
+}
+
+func ValidateJWTToken_Sook(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		Trace.Println("Sook in ValidateJWTToken")
+		// Reject anything other than Bearer
+		// expect var 'mechanism' to be []string{"Bearer", "TOKEN_STRING"}
+		mechanism := strings.Split(r.Header.Get("Authorization"), " ")
+		Trace.Println("Sook in mechanism=", mechanism)
+		if len(mechanism) > 1 && mechanism[0] == "Bearer" {
+			Trace.Println("Sook in if len")
+			if token := mechanism[1]; token != "" {
+				Trace.Println("Sook in if token")
+				// validate token
+				if _, err := VerifyToken(token); err != nil {
+					log.Printf("Validate token err: %v\n", err.Error())
+					if err.Error() == "token expired" {
+						http.Error(w, err.Error(), http.StatusUnauthorized)
+						// http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
+						return
+					}
+					Trace.Println("Sook in veriftoken err not nil ")
+					http.Error(w, "Invalid Token - Authorization Failed", http.StatusUnauthorized)
+
+					return
+
+				}
+				Trace.Println("Sook in ValidateJWTToken - token verified")
+				next.ServeHTTP(w, r)
+				return
+
+			}
+
+		}
+		Trace.Println("Sook in ValidateJWTToken -last part")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 - Status Unauthorized"))
+
+	})
 }

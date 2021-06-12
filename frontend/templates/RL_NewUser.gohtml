@@ -1,12 +1,6 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/Stuff/Style.css">
-    {{template "HeadTitle" .PageName}}
-    <!-- <title>Car Rental App - New User Registration</title> -->
-</head>
+{{ template "header" }}
 
 <body>
     {{template "BodyTitle" .}}
@@ -15,7 +9,7 @@
     <div class="Application">
         <form method="post">
             <input class="InApplication" type=" text" name="userid" placeholder="User Id"><br>
-            <input class="InApplication" type=" text" name="username" placeholder="User Name"><br>            
+            <input class="InApplication" type=" text" name="username" placeholder="User Name"><br>
             <input class="InApplication" type="password" name="password" placeholder="Password"><br>
             <input class="InApplication" type="password" name="confirmpassword" placeholder="Confirm Password"><br>
             <input class="InApplication" type="text" name="email" placeholder="Email"><br>

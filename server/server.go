@@ -100,7 +100,7 @@ func createServer() http.Handler {
 		Handler(reward)
 	subRReward.Use(middleware.HttpLog)
 	subRReward.Use(middleware.VerifyAPIKey)
-	subRReward.Use(middleware.VerifyHdrToken)
+	subRReward.Use(middleware.ValidateJWTToken)
 
 	// Public route
 	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())

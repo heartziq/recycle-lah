@@ -14,10 +14,19 @@ func index(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, "index.gohtml", Data)
 }
 
-//  contact()  provides contact detailss
-func contact(w http.ResponseWriter, r *http.Request) {
-	executeTemplate(w, "contact.gohtml", nil)
+//  for testing
+func indexSook(w http.ResponseWriter, r *http.Request) {
+	Data := struct {
+		PageName string
+		UserName string
+	}{PageName: "Recyle Lah! Home Page"}
+	executeTemplate(w, "index_sook.gohtml", Data)
 }
+
+// //  contact()  provides contact detailss
+// func contact(w http.ResponseWriter, r *http.Request) {
+// 	executeTemplate(w, "contact.gohtml", nil)
+// }
 
 //  unauthorized()  shows error
 func unauthorized(w http.ResponseWriter, r *http.Request) {

@@ -22,25 +22,28 @@ func login(w http.ResponseWriter, r *http.Request) {
 		PageName  string
 		UserName  string
 		MsgToUser string
+		Dt        map[string]string
 	}{PageName: "Log In"}
 
-	var data map[string]string
-	data = make(map[string]string)
+	Data.Dt = map[string]string{}
+	// data = make(map[string]string)
 	if r.Method == http.MethodPost {
-		validateUser(w, r, data)
-		_, foundMsg := data["Message"]
+		validateUser(w, r, Data.Dt)
+		_, foundMsg := Data.Dt["Message"]
 		if foundMsg {
-			Data.MsgToUser = data["Error"]
+			Data.MsgToUser = Data.Dt["Error"]
 		}
-		_, foundErr := data["Error"]
+		_, foundErr := Data.Dt["Error"]
 		if foundErr {
-			Data.MsgToUser = Data.MsgToUser + ", " + data["Error"]
+			Data.MsgToUser = Data.MsgToUser + ", " + Data.Dt["Error"]
 		}
 		if !foundErr && !foundMsg {
 			http.Redirect(w, r, "welcome", http.StatusFound)
 			return
 		}
+
 	}
+	errlog.Trace.Println("test data", Data.Dt)
 	// executeTemplate(w, "Login.gohtml", Data)
 	// if r.Method == http.MethodPost {
 	// 	validateUser(w, r, data)
@@ -51,7 +54,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	// 		return
 	// 	}
 	// }
-	executeTemplate(w, "login_sook.gohtml", data)
+	executeTemplate(w, "login_sook.gohtml", Data)
 
 }
 
@@ -74,11 +77,13 @@ func collectorLogin(w http.ResponseWriter, r *http.Request) {
 // only authenticated user has access to this page
 func welcome(w http.ResponseWriter, r *http.Request) {
 	data := struct {
+		PageName  string
 		UserName  string
 		Since     string
 		Token     string
 		Collector string
-	}{}
+	}{PageName: "Welcome"}
+
 	user, err := getSession(r)
 	if err != nil {
 		http.Redirect(w, r, "index.gohtml", http.StatusFound)

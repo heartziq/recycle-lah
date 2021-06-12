@@ -50,11 +50,11 @@ func viewPoints(w http.ResponseWriter, r *http.Request) {
 	url := "http://localhost:5000/api/v1/rewards/" + sess.userId + "?key=secretkey"
 	apiReq, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonValue))
 	// bearer := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyMTIzNCIsImV4cCI6MTYyMzQ3NTMwMywiaXNzIjoidGVzdCJ9.USu2NiQ9vcWHGCeV2m1JhZ23P6r5yCL7UY-m-zeVLBg"
-	bearer := sess.token
+	bearer := "Bearer " + sess.token
 	apiReq.Header.Add("Authorization", bearer)
 	apiReq.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
-
+	errlog.Trace.Println("bearer=", bearer)
 	response, err := client.Do(apiReq)
 
 	if err != nil {

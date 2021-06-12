@@ -248,46 +248,46 @@ func fShortDate(input time.Time) string {
 // 	}
 // }
 
-//  checkCollectorAccess check if a user (session details) has the access right
-func checkCollectorAccess(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		//  get cookie
-		key, err := getCookie(r)
-		if err != nil {
-			// probably have not login in - access not allowed
-			errlog.Error.Println("Cookie not found, no access")
-			setFlashCookie(w, "Unauthorized access")
-			message(w, r)
-			return
-		}
-		//  check if session is expired
-		expired, collector, err := isSessionExpired(key)
-		if err != nil {
-			//  session data not found
-			errlog.Error.Println("Session data not found, no access")
-			setFlashCookie(w, "Unauthorized access")
-			message(w, r)
-			return
-		}
-		if expired {
-			setFlashCookie(w, "Your session has expired, please re-login")
-			message(w, r)
-			return
-		}
-		if !collector {
-			//  collector trying to access user web page
-			errlog.Info.Println("account has no user access")
-			setFlashCookie(w, "Unauthorized access")
-			// route to a message page
-			message(w, r)
-			return
-		}
-		errlog.Trace.Println("will route to the requested page")
-		h(w, r)
-		return
+// //  checkCollectorAccess check if a user (session details) has the access right
+// func checkCollectorAccess(h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		//  get cookie
+// 		key, err := getCookie(r)
+// 		if err != nil {
+// 			// probably have not login in - access not allowed
+// 			errlog.Error.Println("Cookie not found, no access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			message(w, r)
+// 			return
+// 		}
+// 		//  check if session is expired
+// 		expired, collector, err := isSessionExpired(key)
+// 		if err != nil {
+// 			//  session data not found
+// 			errlog.Error.Println("Session data not found, no access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			message(w, r)
+// 			return
+// 		}
+// 		if expired {
+// 			setFlashCookie(w, "Your session has expired, please re-login")
+// 			message(w, r)
+// 			return
+// 		}
+// 		if !collector {
+// 			//  collector trying to access user web page
+// 			errlog.Info.Println("account has no user access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			// route to a message page
+// 			message(w, r)
+// 			return
+// 		}
+// 		errlog.Trace.Println("will route to the requested page")
+// 		h(w, r)
+// 		return
 
-	} // return func()
-}
+// 	} // return func()
+// }
 
 func isSessionExpired(sessionKey string) (expired bool, collector bool, err error) {
 	key, ok := mapSessions[sessionKey]
@@ -302,7 +302,7 @@ func isSessionExpired(sessionKey string) (expired bool, collector bool, err erro
 		currentTime := time.Now().UnixNano() / int64(time.Second)
 		errlog.Trace.Println("time.Now():", int(time.Now().Unix()))
 		errlog.Trace.Println("currentTime:", currentTime)
-		if currentTime > (user.sessionCreatedTime + 30*60) {
+		if currentTime > (user.sessionCreatedTime + 60*60) {
 			// delete the session data
 			delete(mapSessions, sessionKey)
 			delete(mapUsers, key)
@@ -370,8 +370,49 @@ func isSessionExpired(sessionKey string) (expired bool, collector bool, err erro
 // 	}
 // }
 
-//  checkUserAccess check if a user (session details) has the access right
-func checkUserAccess(h http.HandlerFunc) http.HandlerFunc {
+// //  checkUserAccess check if a user (session details) has the access right
+// func checkUserAccess(h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		//  get cookie
+// 		key, err := getCookie(r)
+// 		if err != nil {
+// 			// probably have not login in - access not allowed
+// 			errlog.Error.Println("Cookie not found, no access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			message(w, r)
+// 			return
+// 		}
+// 		//  check if session is expired
+// 		expired, collector, err := isSessionExpired(key)
+// 		if err != nil {
+// 			//  session data not found
+// 			errlog.Error.Println("Session data not found, no access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			message(w, r)
+// 			return
+// 		}
+// 		if expired {
+// 			setFlashCookie(w, "Your session has expired, please re-login")
+// 			message(w, r)
+// 			return
+// 		}
+// 		if collector {
+// 			//  collector trying to access user web page
+// 			errlog.Info.Println("account has no user access")
+// 			setFlashCookie(w, "Unauthorized access")
+// 			// route to a message page
+// 			message(w, r)
+// 			return
+// 		}
+// 		errlog.Trace.Println("will route to the requested page")
+// 		h(w, r)
+// 		return
+
+// 	} // return func()
+// }
+
+//  checkAccess check if a user (session details) has the access right
+func checkAccess(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//  get cookie
 		key, err := getCookie(r)
@@ -383,7 +424,7 @@ func checkUserAccess(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		//  check if session is expired
-		expired, collector, err := isSessionExpired(key)
+		expired, _, err := isSessionExpired(key)
 		if err != nil {
 			//  session data not found
 			errlog.Error.Println("Session data not found, no access")
@@ -396,14 +437,7 @@ func checkUserAccess(h http.HandlerFunc) http.HandlerFunc {
 			message(w, r)
 			return
 		}
-		if collector {
-			//  collector trying to access user web page
-			errlog.Info.Println("account has no user access")
-			setFlashCookie(w, "Unauthorized access")
-			// route to a message page
-			message(w, r)
-			return
-		}
+
 		errlog.Trace.Println("will route to the requested page")
 		h(w, r)
 		return

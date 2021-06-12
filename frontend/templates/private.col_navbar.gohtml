@@ -1,16 +1,24 @@
 {{ define "col_prinavbar" }}
-<br />
-  <div class="container">
+<div class="container">
+  <nav>
+    <div style="display: inline-block">
+      <h4>
+        <a href="/collector_welcome" class="navpadding">Jobs Available</a> |
+        <a href="/collector_welcome" class="navpadding">Cancel Job???</a> |
+        <a href="/collector_welcome" class="navpadding">Jobs Completed???</a>
+        <!-- <a href="/logout" class="navpadding">Sign out</a> -->
+      </h4>
+      &nbsp;&nbsp;
+    </div>
+    {{ if .Since }}
+    <div style=" right: 0;">
+      <div style="display: inline-block;">
+        <h4>
+          I am a collector, connected since {{ .Since }}
+        </h4>
+      </div>
+    </div>
+    {{end}}
     <nav>
-      {{ .UserName }}
-      {{ if .Since }}
-          connected since {{ .Since }}
-      {{end}}
-      <a href="/collector_welcome" class="navpadding">Jobs Available</a>
-            <a href="/collector_welcome" class="navpadding">Cancel Job???</a>
-            <a href="/collector_welcome" class="navpadding">Jobs Completed???</a>
-      <a href="/logout" class="navpadding">Sign out</a>&nbsp;&nbsp;
-    <nav>
-  </div>
-  <br />
+</div>
 {{ end }}
