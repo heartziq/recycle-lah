@@ -74,6 +74,7 @@ func (rBin *RBinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
+
 		jsonBinData := rBin.getUserFBFromDB(v)
 		if jsonBinData == nil {
 			w.WriteHeader(http.StatusNotFound)
@@ -190,36 +191,3 @@ func (rBin *RBinHandler) getAllBinsFromDB() (BinData []RecycleBinDetails) {
 	return
 
 }
-
-// func main() {
-// 	//Defer closing sql DB.
-// 	defer ClosedSql()
-
-// 	router := mux.NewRouter()
-// 	router.HandleFunc("/api/v1/recyclebindetails", getAllBinDetails)
-// 	router.HandleFunc("/api/v1/recyclebindetails/feedback", updateBinFeedback)
-// 	router.HandleFunc("/api/v1/recyclebindetails/feedback/{userID}",
-// 		queryBinFeedback)
-// 	fmt.Println("Server recyce lah listening at port 5000")
-// 	http.ListenAndServe(":5000", router)
-// }
-
-// //open sql DB.
-// func OpenSql() {
-// 	var err error
-// 	DBCon, err = sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle")
-// 	if err != nil {
-// 		panic(err.Error())
-// 	} else {
-// 		fmt.Println("Recycle Database opened and left open.")
-// 	}
-// 	if err = DBCon.Ping(); err != nil {
-// 		log.Panic("Recycle Database unreachable Error:", err)
-// 	}
-// }
-
-// //Closed sql DB preferly with Defer: defer ClosedSql().
-// func ClosedSql() {
-// 	DBCon.Close()
-// 	fmt.Println("Closing Recycle Database ...")
-// }

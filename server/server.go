@@ -14,26 +14,11 @@ import (
 	middleware "github.com/heartziq/recycle-lah/server/utility"
 )
 
-// To be removed
-var (
-	handlersList = map[string]http.Handler{
-		"test": &handlers.Test{},
-	}
-)
-
-func createServer() http.Handler {
-	// Sook Yoon pls uncomment this Line 26
-	// db, err := sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle")
-
-	// Comment out Line 29
-	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
-	if err != nil {
-		panic(err)
-	}
+func createServer(db *sql.DB) http.Handler {
 
 	// Initialize handlers
-	pickup := handlers.CreatePickupHandler(db, "")
-	rBin := handlers.CreateRBinHandler(db, "")
+	pickUpHandler := handlers.CreatePickupHandler(db, "")
+	recycleBinHandler := handlers.CreateRBinHandler(db, "")
 
 	// Init Main Router
 	router := mux.NewRouter()
@@ -41,51 +26,40 @@ func createServer() http.Handler {
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
 
-	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&role=collector
+	//
+	// endpoint: Pickups //
+	//
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/pickups/{id}").
 		Queries("key", "{key}").
-		// Queries("limit", "{limit}").
 		Queries("role", "{role:user|collector}").
-		Handler(pickup)
+		Handler(pickUpHandler)
 
 	subR.Use(middleware.VerifyAPIKey)
 
-	// test
-	if v, ok := handlersList["test"].(*handlers.Test); ok {
-		v.UseDb(db)
-		// v.SetTemplate("templates/test/*")
-	}
+	router.HandleFunc("/api/v1/pickups", pickUpHandler.ShowPickup())
 
 	//
-	// A route "test" that use AddAuthHeader middleware
+	// endpoint: RecycleBin //
 	//
-	subR = router.NewRoute().Subrouter()
-	subR.
-		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/test/{id:\\d+}").
-		Queries("key", "{key}").
-		Handler(handlersList["test"])
-
-	subR.Use(middleware.AddAuthHeader)
-
 	router.
 		Methods("GET", "POST").
-		Path("/api/v1/recyclebindetails/{userID}"). // Input random id for post
-		Handler(rBin)
-
-	// Public route
-	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
-	// recycle
-	router.HandleFunc("/api/v1/recyclebindetails", rBin.GetAllBinDetails())
+		Path("/api/v1/recyclebindetails/{userID:\\d*|NIL}"). // set to NIL or integer
+		Handler(recycleBinHandler)
 
 	return router
 }
 
 func main() {
-	// Instantiate server
-	router := createServer()
+	// create db connect
+	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
+	if err != nil {
+		panic(err)
+	}
+
+	// create server
+	router := createServer(db)
 
 	// Serve
 	go func() {
@@ -97,8 +71,11 @@ func main() {
 	<-c
 
 	// Do some cleaning ups before shutdown
-	log.Println("INterrupt.. closing connection...")
-	log.Println("Doing cleanup...")
+	log.Println("INterrupt.. closing DB connection...")
+	if err := db.Close(); err != nil { // Close db connection
+		log.Printf("error closing db connection: %v", err)
+	}
+
 	log.Println("done cleaning up")
 
 }
