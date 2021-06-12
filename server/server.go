@@ -14,6 +14,7 @@ import (
 	middleware "github.com/heartziq/recycle-lah/server/utility"
 )
 
+// To be removed
 var (
 	handlersList = map[string]http.Handler{
 		"test": &handlers.Test{},
@@ -21,6 +22,10 @@ var (
 )
 
 func createServer() http.Handler {
+	// Sook Yoon pls uncomment this Line 26
+	// db, err := sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle")
+
+	// Comment out Line 29
 	db, err := sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
 	if err != nil {
 		panic(err)
@@ -28,12 +33,14 @@ func createServer() http.Handler {
 
 	// Initialize handlers
 	pickup := handlers.CreatePickupHandler(db, "")
+	rBin := handlers.CreateRBinHandler(db, "")
 
 	// Init Main Router
 	router := mux.NewRouter()
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
+
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
@@ -63,10 +70,15 @@ func createServer() http.Handler {
 
 	subR.Use(middleware.AddAuthHeader)
 
+	router.
+		Methods("GET", "POST").
+		Path("/api/v1/recyclebindetails/{userID}"). // Input random id for post
+		Handler(rBin)
+
 	// Public route
 	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
-	router.HandleFunc("/api/v1/recycle", handlers.Recylce)
+	router.HandleFunc("/api/v1/recyclebindetails", rBin.GetAllBinDetails())
 
 	return router
 }
