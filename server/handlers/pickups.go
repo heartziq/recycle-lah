@@ -48,12 +48,6 @@ var (
 	}
 )
 
-// type RecycleLahHandler interface {
-// 	http.Handler
-// 	UseDb(db *sql.DB) error
-// 	SetTemplate(path string)
-// }
-
 type pickup struct {
 	Id        string  `json:"id"`
 	Lat       float64 `json:"lat"`
@@ -258,7 +252,6 @@ func (p *PickupHandler) deletePickup(pickup_id string) error {
 func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// User
 	vars := mux.Vars(r)
-	// limit := vars["limit"]
 	role := vars["role"]
 	pickup_id := vars["id"]
 
@@ -287,26 +280,11 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("inserted"))
 		case "PUT": // Approve a pickup
-			// reqBody, err := io.ReadAll(r.Body)
-			// if err != nil {
-			// 	w.WriteHeader(http.StatusBadRequest)
-			// 	w.Write([]byte("error parsing body"))
-			// 	return
-			// }
-			// payload := map[string]string{}
-			// json.Unmarshal(reqBody, &payload)
 			p.approvePickup(pickup_id)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("approve successful!"))
 
 		case "DELETE": // Cancel a pickup
-			// body, err := io.ReadAll(r.Body)
-			// if err != nil {
-			// 	panic(err)
-
-			// }
-			// payload := map[string]string{}
-			// json.Unmarshal(body, &payload)
 			if err := p.deletePickup(pickup_id); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("sql/server error -- operation aborted!"))
