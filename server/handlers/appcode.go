@@ -57,10 +57,6 @@ type AuthenticationError error
 
 var errErrAuthenticate = AuthenticationError(errors.New("Invalid username and/or password"))
 
-// **  TO TEST FURTHER - 1 June 2021 - seems to be always true
-// func appUserError() checks if an error is of type AppUseError.
-// It returns true if it is one and returns false otherwise.
-//
 func appUserError(err error) string {
 	if _, ok := err.(AppUserError); ok {
 		return err.Error()

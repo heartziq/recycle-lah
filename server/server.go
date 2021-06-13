@@ -31,7 +31,7 @@ func createServer(db *sql.DB) http.Handler {
 	}
 	// handlers.DBCon = db
 	// Initialize handlers
-	pickup := handlers.CreatePickupHandler(db, "")
+	pickUpHandler := handlers.CreatePickupHandler(db, "")
 	recycleBinHandler := handlers.CreateRBinHandler(db, "")
 	reward := handlers.CreateRewardHandler(db, "")
 	user := handlers.CreateUserHandler(db, "")
@@ -39,35 +39,59 @@ func createServer(db *sql.DB) http.Handler {
 
 	// Protected route - need to supply API_KEY
 	subR := router.NewRoute().Subrouter()
-	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
+	//
+	// endpoint: Pickups //
+	//
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
-		// Path("/api/v1/pickups/{id:\\d+}").
 		Path("/api/v1/pickups/{id}").
 		Queries("key", "{key}").
-		// Queries("limit", "{limit}").
 		Queries("role", "{role:user|collector}").
-		Handler(pickup)
+		Handler(pickUpHandler)
 
 	subR.Use(middleware.VerifyAPIKey)
 
-	// test
-	if v, ok := handlersList["test"].(*handlers.Test); ok {
-		v.UseDb(db)
-		// v.SetTemplate("templates/test/*")
-	}
+	router.HandleFunc("/api/v1/pickups", pickUpHandler.ShowPickup())
 
 	//
-	// A route "test" that use AddAuthHeader middleware
+	// endpoint: RecycleBin //
 	//
-	subR = router.NewRoute().Subrouter()
-	subR.
-		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/test/{id:\\d+}").
-		Queries("key", "{key}").
-		Handler(handlersList["test"])
+	router.
+		Methods("GET", "POST").
+		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
+		Handler(recycleBinHandler)
 
-	subR.Use(middleware.AddAuthHeader)
+	// // Protected route - need to supply API_KEY
+	// subR := router.NewRoute().Subrouter()
+	// // URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
+	// subR.
+	// 	Methods("GET", "PUT", "POST", "DELETE").
+	// 	// Path("/api/v1/pickups/{id:\\d+}").
+	// 	Path("/api/v1/pickups/{id}").
+	// 	Queries("key", "{key}").
+	// 	// Queries("limit", "{limit}").
+	// 	Queries("role", "{role:user|collector}").
+	// 	Handler(pickUpHandler)
+
+	// subR.Use(middleware.VerifyAPIKey)
+
+	// // test
+	// if v, ok := handlersList["test"].(*handlers.Test); ok {
+	// 	v.UseDb(db)
+	// 	// v.SetTemplate("templates/test/*")
+	// }
+
+	// //
+	// // A route "test" that use AddAuthHeader middleware
+	// //
+	// subR = router.NewRoute().Subrouter()
+	// subR.
+	// 	Methods("GET", "PUT", "POST", "DELETE").
+	// 	Path("/api/v1/test/{id:\\d+}").
+	// 	Queries("key", "{key}").
+	// 	Handler(handlersList["test"])
+
+	// subR.Use(middleware.AddAuthHeader)
 
 	// /*
 
@@ -106,16 +130,9 @@ func createServer(db *sql.DB) http.Handler {
 
 	// added by sook to test whether backup is ok
 	// Public route
-	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
+	// router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
 	// router.HandleFunc("/api/v1/recycle", handlers.Recylce)
-	//
-	// endpoint: RecycleBin //
-	//
-	router.
-		Methods("GET", "POST").
-		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
-		Handler(recycleBinHandler)
 
 	// // recyblebindetails
 	// router.HandleFunc("/api/v1/recyclebindetails", handlers.GetAllBinDetails)

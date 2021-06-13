@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -21,52 +20,31 @@ type UserHandler struct {
 	Tpl *template.Template
 }
 
-var UserNameExp = regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9_\\.]*[a-zA-Z0-9]$")
-
-// func UserNamePattern() matches a given string with UserNameExp.
-// It returns true if it matches.
-// Otherwise, it returns false.
-func UserNamePattern(s string) bool {
-	matched := UserNameExp.MatchString(s)
-	return matched
-}
-
-// setting up template
+// method SetTemplate() to setting up template
 func (p *UserHandler) SetTemplate(path string) {
 	p.Tpl = template.Must(template.ParseGlob(path))
 }
 
-// func init() calls various functions as well as getting command line arguments
-// to setup server and database configuration details.  It then call openDB() to
-// establish database connection.
-// func init() {
-// 	// loadConfig()
-// 	// getArgs()
-// 	var err error
-// 	if db, err = middleware.OpenDB(); err != nil {
-// 		errlog.Panic.Panicln(err)
-// 	}
-// 	// Tpl = template.Must(template.ParseGlob("templates/user/*"))
-// }
-
+// func CreateUserHandler() sets database handler and template path
+// template currently unused
 func CreateUserHandler(db *sql.DB, templatePath string) *UserHandler {
 	newUser := &UserHandler{Db: db}
 	if templatePath != "" {
 		newUser.SetTemplate(templatePath)
 	}
-
 	return newUser
 }
 
-// func Users(w http.ResponseWriter, r *http.Request) {
+// func ServeHTTP calls the respective handlers based on requeset header's content type and method
+// it implements a panic recovery function to better handling of client connection
 func (p *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	errlog.Info.Println("r.Host", r.Host)
-	errlog.Info.Println("r.URL", r.URL)
-	errlog.Info.Println("r.RequestURI", r.RequestURI)
-	errlog.Info.Println("r.Context", r.Context())
-	errlog.Info.Println("r.Header", r.Header)
-
 	defer recoverFunc()
+	errlog.Trace.Println("r.Host", r.Host)
+	errlog.Trace.Println("r.URL", r.URL)
+	errlog.Trace.Println("r.RequestURI", r.RequestURI)
+	errlog.Trace.Println("r.Context", r.Context())
+	errlog.Trace.Println("r.Header", r.Header)
+
 	id, reqBody, err := p.userPreProcessRequest(w, r)
 	if err != nil {
 		errlog.Error.Println(err)
@@ -76,60 +54,44 @@ func (p *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Content-type") == "application/json" {
 		switch r.Method {
-		case "GET":
+		case "GET": // verify user - authentication
 			p.methodVerifyUser(w, r, id, reqBody)
-
-			// w.WriteHeader(http.StatusOK)
-			// w.Write([]byte("to verify user"))
 			return
-		case "DELETE":
+		case "DELETE": // mark a user record as deleted
 			p.methodDeleteUser(w, r, id)
 			return
-			// w.WriteHeader(http.StatusOK)
-			// w.Write([]byte("DELETE: mark user record as deleted"))
-		case "PUT":
-			errlog.Trace.Println("user PUT ")
+		case "PUT": // update user particular
 			p.methodPutUser(w, r, id, reqBody)
 			return
-			// w.WriteHeader(http.StatusOK)
-			// w.Write([]byte("POST: create user in package userhandler"))
-		case "POST":
-			errlog.Trace.Println("user POST ")
+		case "POST": // create new user
 			p.methodPostUser(w, r, id, reqBody)
 			return
-			// w.WriteHeader(http.StatusOK)
-			// w.Write([]byte("POST: create user in package userhandler"))
 		}
 	} else {
 		switch r.Method {
-		case "GET":
+		case "GET": // get user details
 			p.methodGetUser(w, r, id)
 			return
-			// w.WriteHeader(http.StatusOK)
-			// w.Write([]byte("DELETE: mark user record as deleted"))
 		}
 	}
-
 	errlog.Error.Println("Uncaterred request")
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte("405 - Method Not Allowed"))
 } // func Users()
 
-// func methodPostUser() unmarshals the request body from its parameters list into
-// msUser data structure format. It performs input validation on the data received.
-// All responses returned to the response writer is in the format of Response data structure.
-// When the data passes the validation check, it calls processAddUser() to perform the
-// request. Based on the return values from processAddUser(), it prepares the appropriate
-// response and calls encodeJsonAndWrite() to encode and send the data in json format.
+// func methodPostUser() process request data from the client and call functions to
+// insert new record into the database table.  It checks for error handling and will
+// update database only when there is no error.
+// It returns a response that contains the status of the operation.
 func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id string, reqBody []byte) {
 	errlog.Trace.Println(id, string(reqBody))
 	var newUser NewUser
 	var dbData dbNewUser
 	var rsp Response
+
 	// unmarshal data into couseInfo data structure
 	err := json.Unmarshal(reqBody, &newUser)
-
-	errlog.Trace.Println("====================newUser", newUser, id, newUser.Password, newUser.Email, newUser.UserName, newUser.Collector)
+	// errlog.Trace.Println("====================newUser", newUser, id, newUser.Password, newUser.Email, newUser.UserName, newUser.Collector)
 	if err != nil {
 		errlog.Error.Println(err)
 		rsp.Message = userErrUnmarshalReqBody.Error()
@@ -137,9 +99,9 @@ func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id 
 		p.encodeJsonAndWrite(w, rsp)
 		return
 	}
-	// validates if details presents
 
-	errlog.Trace.Println(newUser)
+	// validates if details presents
+	// errlog.Trace.Println(newUser)
 	if strings.TrimSpace(id) == "" {
 		errlog.Error.Println("id is blank")
 		rsp.Message = userErrMissingAccount.Error()
@@ -147,14 +109,14 @@ func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id 
 		p.encodeJsonAndWrite(w, rsp)
 		return
 	}
-	// validates if title presents
+	// validates if password presents
 	if strings.TrimSpace(newUser.Password) == "" {
 		rsp.Message = errNoPassword.Error()
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		p.encodeJsonAndWrite(w, rsp)
 		return
 	}
-	// validates format for email
+	// validates format for email - currently not checking for email format
 	ok := true
 	if !ok {
 		rsp.Message = errEmailFormat.Error()
@@ -162,13 +124,14 @@ func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id 
 		p.encodeJsonAndWrite(w, rsp)
 		return
 	}
+	// assign details to dbData to be passed to addUser() function
 	dbData.id = id
 	dbData.password = string(middleware.HashPassword(newUser.Password))
 	dbData.email = newUser.Email
 	dbData.userName = newUser.UserName
 	dbData.collector = newUser.Collector
 	// proceed to process creation and prepare response accordingly
-	errlog.Trace.Printf("Going to add: %s %s\n", id, newUser.Email)
+	errlog.Trace.Printf("Going to add: %s %s\n", id, newUser.UserName)
 	if err := p.addUser(p.Db, dbData); err != nil {
 		// if error shows duplicate record, set response message accordingly
 		if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
@@ -176,13 +139,13 @@ func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id 
 			w.WriteHeader(http.StatusConflict)
 			p.encodeJsonAndWrite(w, rsp)
 			return
-		} else { // else no duplicate
+		} else { // else not duplicate error
 			rsp.Message = appUserError(err)
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			p.encodeJsonAndWrite(w, rsp)
 			return
-		} // else no diplicate
-	} else { // else no err from processAddUser
+		} // else not diplicate error
+	} else { // else no err from processAddUser - successful
 		errlog.Trace.Println(">>>>>>201 - User added:", id)
 		rsp.Success = true
 		w.WriteHeader(http.StatusCreated)
@@ -191,8 +154,7 @@ func (p *UserHandler) methodPostUser(w http.ResponseWriter, r *http.Request, id 
 	} // else no err from processAddUser
 } // methodPostUser()
 
-// func methodDeleteUser() performs input validation on the id received.
-// It calls processMarkUserAsDelete() to perform the request.
+// func methodDeleteUser() calls processMarkUserAsDelete() to perform the request.
 // Based on the return values from processMarkUserAsDelete(), it prepares the appropriate
 // response and calls encodeJsonAndWrite() to encode and send the data in json format.
 func (p *UserHandler) methodDeleteUser(w http.ResponseWriter, r *http.Request, id string) {
@@ -217,8 +179,8 @@ func (p *UserHandler) methodDeleteUser(w http.ResponseWriter, r *http.Request, i
 	p.encodeJsonAndWrite(w, rsp)
 } // func methodDeleteUser
 
-// func addUser() inserts a new record of table courses.  It returns
-// the number of rows affected and any error encountered.
+// func addUser() inserts a new user record into the database.  It returns
+// error if error encountered.
 func (p *UserHandler) addUser(db *sql.DB, user dbNewUser) error {
 	results, err := db.Exec("INSERT INTO user (id, password, email, user_name, is_collector) VALUES (?,?,?,?,?)", user.id, user.password, user.email, user.userName, user.collector)
 	if err != nil {
@@ -246,8 +208,6 @@ func (p *UserHandler) processMarkUserAsDelete(db *sql.DB, id string) error {
 	i, err := p.markUserAsDelete(db, id)
 	if err != nil {
 		errlog.Trace.Println(err)
-		errlog.Trace.Println("in processMarkUserAsDelete:", appUserError(err))
-
 		return err
 	}
 	if i == 1 {
@@ -289,10 +249,9 @@ func (p *UserHandler) encodeJsonAndWrite(w http.ResponseWriter, rsp Response) {
 	json.NewEncoder(w).Encode(rsp)
 }
 
-// func preProcessParam() checks for the course code and performs
-// input validation (e.g. length, code format) and sanitization (converts to uppercase).
+// func userPreProcessParam() checks for the parameters and performs input validation
 // It writes to the client when an error is detected.
-// It returns course code if there is no error.
+// It returns the parameter if there is no error.
 func (p *UserHandler) userPreProcessParam(w http.ResponseWriter, r *http.Request) (string, error) {
 	rsp := Response{}
 	params := mux.Vars(r)
@@ -329,10 +288,9 @@ func (p *UserHandler) userPreProcessParam(w http.ResponseWriter, r *http.Request
 	}
 	errlog.Trace.Printf("id supplied=%s\n", id)
 	return id, nil
-	// return strings.ToUpper(id), nil
 }
 
-// func preProcessBody() reads the request's body and returns
+// func userPreProcessBody() reads the request's body and returns
 // the body if there is no error.  It writes to the client when an error is detected.
 func (p *UserHandler) userPreProcessBody(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 	rsp := Response{}
@@ -345,24 +303,14 @@ func (p *UserHandler) userPreProcessBody(w http.ResponseWriter, r *http.Request)
 		p.encodeJsonAndWrite(w, rsp)
 		return nil, err
 	}
-	errlog.Trace.Printf("request body:%v\n", string(reqBody))
+	// errlog.Trace.Printf("request body:%v\n", string(reqBody))
 	return reqBody, nil
 }
 
-// func preProcessRequest() calls few function to extract the api key,
-// course code and request body from the http.Request.
+// func userPreProcessRequest() calls few function to extract data from the http.Request.
 // It returns these values when there is no error occurred.
 func (p *UserHandler) userPreProcessRequest(w http.ResponseWriter, r *http.Request) (id string, reqBody []byte, err error) {
-	errlog.Info.Println("r.Host", r.Host)
-	errlog.Info.Println("r.URL", r.URL)
-	errlog.Info.Println("r.RequestURI", r.RequestURI)
-	errlog.Info.Println("r.Context", r.Context())
-	errlog.Info.Println("r.Header", r.Header)
-	// apikey, err = preProcessQuery(w, r)
-	// if err != nil {
-	// 	return "", "", nil, err
-	// }
-	// params
+	// get params
 	id, err = p.userPreProcessParam(w, r)
 	if err != nil {
 		return "", nil, err
@@ -373,6 +321,7 @@ func (p *UserHandler) userPreProcessRequest(w http.ResponseWriter, r *http.Reque
 	return id, reqBody, nil
 }
 
+// func getUserInfo() retrieve user record from database for a given user id
 func (p *UserHandler) getUserInfo(db *sql.DB, id string) (UserInfo, error) {
 	var user UserInfo
 
@@ -389,6 +338,7 @@ func (p *UserHandler) getUserInfo(db *sql.DB, id string) (UserInfo, error) {
 	return user, nil
 }
 
+// func methodGetUser calls getUserInfo to get database details and return reward points to the client
 func (p *UserHandler) methodGetUser(w http.ResponseWriter, r *http.Request, id string) {
 	var rsp UserInfoResponse
 	if rewardPoints, err := p.getUserInfo(p.Db, id); err != nil {
@@ -405,7 +355,7 @@ func (p *UserHandler) methodGetUser(w http.ResponseWriter, r *http.Request, id s
 	p.encodeUserInfoJsonAndWrite(w, rsp)
 } // func methodDeleteUser
 
-// func encodeRewardsJsonAndWrite() sets the header of the http.ResponseWriter
+// func encodeUserInfoJsonAndWrite() sets the header of the http.ResponseWriter
 // to "application/json".  It then encodes the data into json and writes
 // to the http.ResponseWriter.
 func (p *UserHandler) encodeUserInfoJsonAndWrite(w http.ResponseWriter, rsp UserInfoResponse) {
@@ -415,7 +365,8 @@ func (p *UserHandler) encodeUserInfoJsonAndWrite(w http.ResponseWriter, rsp User
 	json.NewEncoder(w).Encode(rsp)
 }
 
-// func methodVerifyUser() calls functions to perform user authentication
+// func methodVerifyUser() unmarshal input, and calls functions to perform user authentication and
+// return user details in the response
 func (p *UserHandler) methodVerifyUser(w http.ResponseWriter, r *http.Request, id string, reqBody []byte) {
 	errlog.Trace.Println(id, string(reqBody))
 	var authenticateInfo UserVerification
@@ -471,6 +422,7 @@ func (p *UserHandler) methodVerifyUser(w http.ResponseWriter, r *http.Request, i
 	p.encodeUserInfoJsonAndWrite(w, rsp)
 } // func methodDeleteUser
 
+// method getUserSensitiveInfo retrieves password and other details
 func (p *UserHandler) getUserSensitiveInfo(db *sql.DB, id string) (UserInfo, error) {
 	var user UserInfo
 

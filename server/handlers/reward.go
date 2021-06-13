@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -17,9 +16,7 @@ import (
 type RewardHandler struct {
 	Db  *sql.DB
 	Tpl *template.Template
-	// error logging
-	// Info  *log.Logger
-	Error *log.Logger
+	// Error *log.Logger
 }
 
 func CreateRewardHandler(db *sql.DB, templatePath string) *RewardHandler {
@@ -27,25 +24,26 @@ func CreateRewardHandler(db *sql.DB, templatePath string) *RewardHandler {
 	if templatePath != "" {
 		newReward.SetTemplate(templatePath)
 	}
-
 	return newReward
 }
 
-// setting up template
+// setting up template, currently not using template
 func (p *RewardHandler) SetTemplate(path string) {
-
 	p.Tpl = template.Must(template.ParseGlob(path))
 }
 
+// func ServeHTTP calls the respective handlers based on requeset header's content type and method
+// it implements a panic recovery function to better handling of client connection
 func (p *RewardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	errlog.Info.Println("r.Host", r.Host)
-	errlog.Info.Println("r.URL", r.URL)
-	errlog.Info.Println("r.RequestURI", r.RequestURI)
-	errlog.Info.Println("r.Context", r.Context())
-	errlog.Info.Println("r.Header", r.Header)
-	errlog.Info.Println("r.Header.Get(Authorization)", r.Header.Get("Authorization"))
-
 	defer recoverFunc()
+	errlog.Trace.Println("r.Host", r.Host)
+	errlog.Trace.Println("r.URL", r.URL)
+	errlog.Trace.Println("r.RequestURI", r.RequestURI)
+	errlog.Trace.Println("r.Context", r.Context())
+	errlog.Trace.Println("r.Header", r.Header)
+	errlog.Trace.Println("r.Header.Get(Authorization)", r.Header.Get("Authorization"))
+
+	// processing request
 	id, reqBody, err := p.userPreProcessRequest(w, r)
 	if err != nil {
 		errlog.Error.Println(err)
@@ -54,25 +52,21 @@ func (p *RewardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("afeter pre-processing request", id, string(reqBody))
 
 	switch r.Method {
-	case "GET":
+	case "GET": // get reward points
 		p.methodGetRewards(w, r, id)
 		return
-		// w.WriteHeader(http.StatusOK)
-		// w.Write([]byte("DELETE: mark user record as deleted"))
-
-	case "PUT":
+	case "PUT": // update reward points
 		errlog.Trace.Println("reward PUT")
 		p.methodUpdateRewards(w, r, id, reqBody)
 		return
-		// w.WriteHeader(http.StatusOK)
-		// w.Write([]byte("POST: create user in package userhandler"))
 	}
-
 	errlog.Error.Println("Uncaterred request")
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte("405 - Method Not Allowed"))
 }
 
+// func methodGetRewards() process request and call db function to retrieve the reward points
+// It then send a response back to the client
 func (p *RewardHandler) methodGetRewards(w http.ResponseWriter, r *http.Request, id string) {
 	var rsp RewardPointsResponse
 
@@ -101,6 +95,8 @@ func (p *RewardHandler) encodeRewardsJsonAndWrite(w http.ResponseWriter, rsp Rew
 	json.NewEncoder(w).Encode(rsp)
 }
 
+// func getRewardPoints() retrieves reward points from database table and return
+// reward points and error if any
 func (p *RewardHandler) getRewardPoints(db *sql.DB, id string) (int, error) {
 	var reward struct {
 		points int
@@ -139,14 +135,15 @@ func (p *RewardHandler) updateRewardPoints(db *sql.DB, id string, points int) (i
 	} // no err
 } // func markUserAsDelete()
 
+// func methodUpdateRewards processes request and calls database function to perform update
+// if there is no error. It will send response back to the client
 func (p *RewardHandler) methodUpdateRewards(w http.ResponseWriter, r *http.Request, id string, reqBody []byte) {
 	errlog.Trace.Println(id, string(reqBody))
 	var reward AdditionalRewardPoints
 	var rsp Response
+
 	// unmarshal data into couseInfo data structure
 	err := json.Unmarshal(reqBody, &reward)
-
-	errlog.Trace.Println("====================additional reward", id, reward)
 	if err != nil {
 		errlog.Error.Println(err)
 		rsp.Message = userErrUnmarshalReqBody.Error()
@@ -157,20 +154,20 @@ func (p *RewardHandler) methodUpdateRewards(w http.ResponseWriter, r *http.Reque
 	// validates if details presents
 
 	// proceed to update and prepare response accordingly
-	errlog.Trace.Printf("Going to update points: %s %d\n", id, reward.Points)
-	if _, err := p.updateRewardPoints(db, id, reward.Points); err != nil {
+	// errlog.Trace.Printf("Going to update points: %s %d\n", id, reward.Points)
+	if _, err := p.updateRewardPoints(p.Db, id, reward.Points); err != nil {
 		rsp.Message = appUserError(err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		p.encodeJsonAndWrite(w, rsp)
 		return
-	} else { // else no err from processAddUser
+	} else { // else no err
 		errlog.Trace.Println(">>>>>>201 - User added:", id)
 		rsp.Success = true
 		w.WriteHeader(http.StatusCreated)
 		p.encodeJsonAndWrite(w, rsp)
 		return
-	} // else no err from processAddUser
-} // methodPostUser()
+	} // else no err
+} // methodUpdateRewards()
 
 // func encodeJsonAndWrite() sets the header of the http.ResponseWriter
 // to "application/json".  It then encodes the data into json and writes
@@ -182,34 +179,22 @@ func (p *RewardHandler) encodeJsonAndWrite(w http.ResponseWriter, rsp Response) 
 	json.NewEncoder(w).Encode(rsp)
 }
 
-// func preProcessRequest() calls few function to extract the api key,
-// course code and request body from the http.Request.
+// func userPreProcessRequest() calls functions to extract parameters and request body
 // It returns these values when there is no error occurred.
 func (p *RewardHandler) userPreProcessRequest(w http.ResponseWriter, r *http.Request) (id string, reqBody []byte, err error) {
-	errlog.Info.Println("r.Host", r.Host)
-	errlog.Info.Println("r.URL", r.URL)
-	errlog.Info.Println("r.RequestURI", r.RequestURI)
-	errlog.Info.Println("r.Context", r.Context())
-	errlog.Info.Println("r.Header", r.Header)
-	// apikey, err = preProcessQuery(w, r)
-	// if err != nil {
-	// 	return "", "", nil, err
-	// }
 	// params
 	id, err = p.userPreProcessParam(w, r)
 	if err != nil {
 		return "", nil, err
 	}
-	//
 	reqBody, err = p.userPreProcessBody(w, r)
 	errlog.Info.Println(id, string(reqBody), err)
 	return id, reqBody, nil
 }
 
-// func preProcessParam() checks for the course code and performs
-// input validation (e.g. length, code format) and sanitization (converts to uppercase).
+// func userPreProcessParam() checks for the parameters and performs input validation
 // It writes to the client when an error is detected.
-// It returns course code if there is no error.
+// It returns the parameter if there is no error.
 func (p *RewardHandler) userPreProcessParam(w http.ResponseWriter, r *http.Request) (string, error) {
 	rsp := Response{}
 	params := mux.Vars(r)
@@ -230,20 +215,20 @@ func (p *RewardHandler) userPreProcessParam(w http.ResponseWriter, r *http.Reque
 		return "", errNoId
 	}
 	//  should not check here - should move to individual method
-	if len(id) > 30 {
-		rsp.Message = errUserNameLength.Error()
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		p.encodeJsonAndWrite(w, rsp)
-		return "", errUserNameLength
-	}
-	ok = UserNamePattern(id)
-	if !ok {
-		rsp.Message = errUserNameFmt.Error()
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		p.encodeJsonAndWrite(w, rsp)
-		return "", errUserNameFmt
+	// if len(id) > 30 {
+	// 	rsp.Message = errUserNameLength.Error()
+	// 	w.WriteHeader(http.StatusUnprocessableEntity)
+	// 	p.encodeJsonAndWrite(w, rsp)
+	// 	return "", errUserNameLength
+	// }
+	// ok = UserNamePattern(id)
+	// if !ok {
+	// 	rsp.Message = errUserNameFmt.Error()
+	// 	w.WriteHeader(http.StatusUnprocessableEntity)
+	// 	p.encodeJsonAndWrite(w, rsp)
+	// 	return "", errUserNameFmt
 
-	}
+	// }
 	errlog.Trace.Printf("id supplied=%s\n", id)
 	return strings.ToUpper(id), nil
 }
@@ -261,6 +246,6 @@ func (p *RewardHandler) userPreProcessBody(w http.ResponseWriter, r *http.Reques
 		p.encodeJsonAndWrite(w, rsp)
 		return nil, err
 	}
-	errlog.Trace.Printf("request body:%v\n", string(reqBody))
+	// errlog.Trace.Printf("request body:%v\n", string(reqBody))
 	return reqBody, nil
 }
