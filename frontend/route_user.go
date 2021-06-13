@@ -89,7 +89,6 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "index.gohtml", http.StatusFound)
 		return
 	}
-
 	data.UserName = user.userName
 	data.Since = string(time.Unix(user.sessionCreatedTime, 0).String()[0:19])
 	data.Token = user.token

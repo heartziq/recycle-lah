@@ -1,19 +1,31 @@
 <!doctype html>
 <html lang="en">
 
-{{ template "header" }}
+{{ template "header" .}}
 
 <body>
     {{template "BodyTitle" .}}
+    {{ template "prinavbar" . }}
     <br>
     <h3 class="Application">Please provide pickup detail!</h3>
     <div class="Application">
         <form method="post">
-            <input class="InApplication" type=" text" name="description" placeholder="description"><br>
-            <input class="InApplication" type=" text" name="weightrange" placeholder="weightrange"><br>
-            <input class="InApplication" type="text" name="address" placeholder="address"><br>
-            <input class="InApplication" type="text" name="postcode" placeholder="postcode"><br>            <input class="Application" type="submit">
-            <b><a href="/login">Log In</a></b>
+            <label for="InApplication">Describe the items to be recycled:</label><br>
+            <textarea class="InApplication" rows:="3" type=" text" name="description"
+                placeholder="description"></textarea><br><br>
+            <label for="weightrange">Weight range:</label><br>
+            <select id="weightrange" class="InApplication" type=" text" name="weightrange"
+                placeholder="weightrange"><br><br>
+                <option value="1">1) up to 1kg</option>
+                <option value="2">2) 1kg, up to 5kg</option>
+                <option value="3">3) 5kg, up to 10kg</option>
+                <option value="4">4) more then 10kg</option>
+            </select><br><br>
+            <label for="InApplication">Pickup address:</label><br>
+            <input class="InApplication" type="text" name="address" placeholder="address"><br><br>
+            <label for="InApplication">Postcode:</label><br>
+            <input class="InApplication" type="text" name="postcode" placeholder="postcode"><br><br>
+            <input class="Application" type="submit">
         </form>
     </div>
     <h4 class="Application" id="MsgToUser"></h4>

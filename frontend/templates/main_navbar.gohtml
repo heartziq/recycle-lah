@@ -1,0 +1,20 @@
+{{ define "mainnavbar" }}
+<div class="container">
+  <nav>
+    <div style=" float:left ;width:fit-content;">
+      <h4>
+        {{ if ne . "" }}
+        <a href="/welcome" class="navpadding">Welcome</a> |
+        {{end}}
+        <a href="/newuser" class="navpadding">Create An Account</a> |
+        {{ if ne . "" }}
+        <a href="/userupdate" class="navpadding">Update Account</a> |
+        {{end}}
+        <a href="/indexBin" class="navpadding">Bin's Index</a>
+        &nbsp;&nbsp;
+      </h4>
+    </div>
+  </nav>
+</div>
+<br>
+{{ end }}

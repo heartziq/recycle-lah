@@ -1,24 +1,24 @@
 <!doctype html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/Stuff/Style.css">
-    {{template "HeadTitle" .PageName}}
-</head>
+{{ template "header" .}}
 
 <body>
     {{template "BodyTitle" .}}
+    {{ if eq .Collector "Y" }}
+    {{ template "col_prinavbar" . }}
+    {{ else }}
+    {{ template "prinavbar" . }}
+    {{ end }}
     <br>
-    <h3 class="Application">Please enter email and password to verify!</h3>
+    <h3 class="Application">Please enter user id!</h3>
     <form method="post">
         <div class="Application">
             <div>
                 <input class="InApplication" type="text" name="userid" placeholder="User ID">
-                <input class="InApplication" type="password" name="oldpassword" placeholder="Old Password">
             </div>
         </div>
-        <h3 class="Application" style="margin-top: 20pt;">Please enter new password and confirm password!</h3>
+        <h3 class="Application" style="margin-top: 20pt;">Please enter new detail below!</h3>
         <div class="Application">
             <div>
                 <input class="InApplication" type="text" name="newusername" placeholder="New User Name">
@@ -29,7 +29,6 @@
         </div>
     </form>
     <h4 class="Application" id="MsgToUser"></h4>
-    {{template "Footer"}}
 </body>
 
 </html>

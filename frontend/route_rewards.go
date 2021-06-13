@@ -26,6 +26,14 @@ import (
 // curl -X GET http://localhost:5000/api/v1/rewards/USER1234?key=secretkey
 func viewPoints(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("\n\n***getRewardPoints***")
+	data := struct {
+		PageName     string
+		UserName     string
+		Since        string
+		RewardPoints int
+		Token        string
+		MsgToUser    string
+	}{PageName: "My Reward Points"}
 
 	//  get data from session
 
@@ -36,6 +44,9 @@ func viewPoints(w http.ResponseWriter, r *http.Request) {
 		message(w, r)
 		return
 	}
+
+	data.UserName = sess.userName
+
 	var reward RewardPointsRequest2
 	reward.Token = sess.token
 
@@ -86,12 +97,12 @@ func viewPoints(w http.ResponseWriter, r *http.Request) {
 			message(w, r)
 			return
 		}
-		data := struct {
-			UserName     string
-			Since        string
-			RewardPoints int
-			Token        string
-		}{}
+		// data := struct {
+		// 	UserName     string
+		// 	Since        string
+		// 	RewardPoints int
+		// 	Token        string
+		// }{}
 		data.RewardPoints = rsp.Points
 		executeTemplate(w, "view_points.gohtml", data)
 		return

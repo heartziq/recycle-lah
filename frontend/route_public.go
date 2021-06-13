@@ -10,7 +10,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 	Data := struct {
 		PageName string
 		UserName string
-	}{PageName: "Recyle Lah! Home Page"}
+	}{PageName: "Home Page"}
+	user, _ := getSession(r)
+	Data.UserName = user.userName
 	executeTemplate(w, "index.gohtml", Data)
 }
 

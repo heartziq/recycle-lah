@@ -208,27 +208,6 @@ func mainMenu(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "RL_MainMenu.gohtml", Data)
 }
 
-//Log Out
-func logOut(res http.ResponseWriter, req *http.Request) {
-
-	Data := struct {
-		PageName string
-		UserName string
-	}{PageName: "Log Out", UserName: "bye-bye"}
-	Cookie, err := req.Cookie("RecycleLah")
-	if err == nil {
-		Cookie.MaxAge = -1
-		delete(mapUsers, mapSessions[Cookie.Value])
-		delete(mapSessions, Cookie.Value)
-		http.SetCookie(res, Cookie)
-		// fmt.Println("Cookie deleted")
-	} else {
-		// fmt.Println("No Cookie found and deleted")
-		http.Redirect(res, req, "/logIn", http.StatusSeeOther)
-	}
-	tpl.ExecuteTemplate(res, "LogOut.gohtml", Data)
-}
-
 //Web Sub Pages func start from below---------------------------------------------------------------------------//
 
 //PickUp
@@ -284,61 +263,56 @@ func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
 		PageName  string
 		UserName  string
 		MsgToUser string
+		Token     string
+		Collector string
 	}{PageName: "Updated Password"}
 
-	// myCookie, err := req.Cookie("recyclelah")
-	// if err != nil {
-	// 	http.Redirect(res, req, "/logIn", http.StatusSeeOther)
-	// } else {
-	// 	Data.UserName = mapSessions[myCookie.Value]
-	// }
+	user, err := getSession(req)
+	if err != nil {
+		http.Redirect(res, req, "index.gohtml", http.StatusFound)
+		return
+	}
+	Data.UserName = user.userName
+	Data.Token = user.token
+	if user.isCollector {
+		Data.Collector = "Y"
+	}
+
 	if req.Method == http.MethodPost {
 		//get user name and current password
 		userId := req.FormValue("userid")
-		password := req.FormValue("oldpassword")
 		//get user new password and confirm the new password
 		newusername := req.FormValue("newusername")
 		newpassword := req.FormValue("newpassword")
 		confirmpassword := req.FormValue("confirmpassword")
 
-		errlog.Trace.Println("Ken In Value=", userId, password, newusername, newpassword, confirmpassword)
+		errlog.Trace.Println("Ken In Value=", userId, newusername, newpassword, confirmpassword)
 
-		var reqData UserVerification
-		reqData.Password = password
-		apiResp, err := verifyUser(userId, reqData)
-		if err != nil {
-			Data.MsgToUser = err.Error()
-			errlog.Trace.Println("validateUser", err)
-			return
-		}
-
-		errlog.Trace.Println("Ken In Value=", apiResp)
-
-		if !apiResp.Success {
-			Data.MsgToUser = "The user name and password is not match! "
+		if userId != user.userId {
+			Data.MsgToUser = "Please log in before do updated detail!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
 		} else if newpassword != confirmpassword {
 			Data.MsgToUser = "New password and confrim password is not same!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
-		} else if userId == "" || password == "" {
+		} else if userId == "" {
 			Data.MsgToUser = "Please insert user id and password for verification!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 		} else {
 			//start update DB
-			var user NewUser
-			user.UserName = newusername
-			user.Password = newpassword
+			var dataUpdate NewUser
+			dataUpdate.UserName = newusername
+			dataUpdate.Password = newpassword
 
 			id := userId
 			// log.Println(email, password, newpassword, confirmpassword, newusername)
-			changeUser(user, id, password)
+			changeUser(dataUpdate, id)
 			// SOOKMODIFIED mapUsers[email] = user{newusername, mapUsers[email].Key}
 			// matchPassword[email] = newpassword
 			//end update DB
 			Data.MsgToUser = "Detail is updated!"
-			defer fmt.Fprintf(res, "<h4 class='Application'><a href='/menu'>Main Menu</a></h4><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
+			defer fmt.Fprintf(res, "<h4 class='Application'><a href='/'>Main Menu</a></h4><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 		}
 	}
 	tpl.ExecuteTemplate(res, "RL_UpdateUserDetail.gohtml", Data)
@@ -366,20 +340,13 @@ func isEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func changeUser(user NewUser, id string, oldpassword string) error {
+func changeUser(user NewUser, id string) error {
 	errlog.Trace.Println("checgeUser: ")
 	jsonValue, err := json.Marshal(user)
 	if err != nil {
 		errlog.Error.Println("error in marshal", err)
 		return err
 	}
-
-	// response, err := client.Post(config.BaseURL+"/"+code+"?key="+config.APIKey,
-	// "application/json", bytes.NewBuffer(jsonValue))
-	// if err != nil {
-	// 	errlog.Trace.Println(err)
-	// 	return err
-	// }
 
 	url := "http://localhost:5000/api/v1/users/" + id + "?key=secretkey"
 	client := &http.Client{}
@@ -409,6 +376,5 @@ func changeUser(user NewUser, id string, oldpassword string) error {
 			return nil
 		}
 		return errors.New(rsp.Message)
-
 	}
 }

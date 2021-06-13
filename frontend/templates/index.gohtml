@@ -1,24 +1,59 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-      <title>Recycle-Lah!</title>
-         <link href="/static/css/css1.css" rel="stylesheet">
-</head>
-<h1>Recycle Lah!</h1>
-<nav>
-<a href="/">Home</a>&nbsp;&nbsp;&nbsp;
-      <a href="/signin" class="navpadding">Sign in (Sook)</a>
-      <a href="/login" class="navpadding">Sign in (Sin Yaw)</a> 
-       <a href="/newusersook" class="navpadding">Create an account (Sook)</a>
-      <a href="/newuser" class="navpadding">Create an account (Sin Yaw)</a>
-</nav>
-<br />
-<h1>JUNE 10 : Sin Yaw</h1>
-<p>  after login, you can access /welcome page and link to View Points and View Pickup Request
-<br /> View Pickup Request will call server - ShowPickupInProgress.  Based on the data, you can
-try to format the output for user_pickup_list.gohtml or your own.  
-<br />  The function is in route_pickup.go
-</p>
-<br /><br />
+
+{{ template "header" .}}
+
+<body>
+      {{template "BodyTitle" .}}
+      {{template "mainnavbar" .UserName}}
+      <!-- <nav>
+            <a>Home</a>&nbsp;&nbsp;&nbsp;
+            <a href="/signin" class="navpadding">Sign in (Sook)</a>
+            <a href="/login" class="navpadding">Sign in (Sin Yaw)</a>
+            <a href="/newusersook" class="navpadding">Create an account (Sook)</a>
+            <a href="/newuser" class="navpadding">Create an account (Sin Yaw)</a>
+      </nav> -->
+      <br />
+      <h1 style="color:#66bfbf;"><Strong>RECYCLE LAH! Safe the planet before its too late. </Strong></h1>
+      <h3 style="color:#66bfbf;">The earth is dying... Recycling and renewables are the answer to this! </h3>
+      <h3 style="color:#66bfbf;">Thus, "Recycle Lah!" is born..</h3><br><br>
+      <br /><br />
+
+      <table class="tablestyle">
+            <tr>
+                  <td><a href="/welcome" class="navpadding">welcome</a></td>
+                  <td><a href="/signin" class="navpadding">signin</a></td>
+            </tr>
+            <tr>
+                  <td><a href="/logout" class="navpadding">logout</a></td>
+                  <td><a href="/newuser" class="navpadding">newuser</a></td>
+            </tr>
+            <tr>
+                  <td><a href="/userupdate" class="navpadding">userupdate</a></td>
+                  <td><a href="/signupsuccess" class="navpadding">signupsuccess</a></td>
+            </tr>
+      </table>
+
+      <table class="tablestyle">
+            <tr>
+                  <td><a href="/view_points" class="navpadding">view_points</a></td>
+                  <td><a href="/user_pickup_list" class="navpadding">user_pickup_list</a></td>
+            </tr>
+            <tr>
+                  <td><a href="/req_pickup" class="navpadding">req_pickup</a></td>
+            </tr>
+      </table>
+
+      <table class="tablestyle">
+            <tr>
+                  <td><a href="/indexBin" class="navpadding">indexBin</a></td>
+                  <td><a href="/recyclebinsFB" class="navpadding">recyclebinsFB</a></td>
+            </tr>
+            <tr>
+                  <td><a href="/queryFB" class="navpadding">queryFB</a></td>
+                  <td><a href="/showrecyclebins" class="navpadding">showrecyclebins</a></td>
+            </tr>
+      </table>
+</body>
+
 </html>

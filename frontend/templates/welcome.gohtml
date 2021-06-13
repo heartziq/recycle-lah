@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-{{ template "header" }}
+{{ template "header" .}}
 
 <body>
   {{template "BodyTitle" .}}
@@ -18,9 +18,9 @@
 
     <br />
     <br />
-    {{ if .Token }}
+    <!-- {{ if .Token }}
     Token = {{ .Token }}
-    {{ end }}
+    {{ end }} -->
     <br />
   </div>
 </body>

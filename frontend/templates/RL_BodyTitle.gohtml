@@ -5,12 +5,9 @@
       <div style="overflow: hidden; max-height: 37px;">
         <div style="display: inline-block;">
           <u>
-            <h1 style="margin-left: 5px">Recycle Lah !</h1>
-          </u>
-        </div>
-        <div style=" display: inline-block;">
-          <u>
-            <h1 style="margin-left: 5px"> - {{.PageName}}</h1>
+            <h1 style="margin-left: 5px">
+              <a class="MainBar" href="/">Recycle Lah! &nbsp&nbsp{{.PageName}}</a>
+            </h1>
           </u>
         </div>
         </h1>
@@ -21,7 +18,7 @@
         {{if eq .PageName "Log Out"}}
         <div style="display: inline-block; overflow: hidden; max-height: 66px;">
           <h3 style="margin: 0px 5px">
-            <a style="text-decoration: none" href="/login"> Log In</a>
+            <a style="text-decoration: none" href="/signin"> Log In</a>
           </h3>
         </div>
         <div style="display: inline-block; overflow: hidden; max-height: 66px;">
@@ -32,7 +29,7 @@
         {{if eq .PageName "New User Registration"}}
         <div style="display: inline-block; overflow: hidden; max-height: 66px;">
           <h3 style="margin: 0px 5px">
-            <a style="text-decoration: none" href="/login"> Log In</a>
+            <a style="text-decoration: none" href="/signin"> Log In</a>
           </h3>
         </div>
         <div style="display: inline-block; overflow: hidden; max-height: 66px;">
@@ -41,6 +38,11 @@
         {{else}}
 
         {{if eq .UserName ""}}
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 5px">
+            <a style="text-decoration: none" href="/signin"> Log In</a>
+          </h3>
+        </div>
         <div style="display: inline-block; overflow: hidden; max-height: 66px;">
           <h3 style="margin: 0px 20px">Hello!</h3>
         </div>
