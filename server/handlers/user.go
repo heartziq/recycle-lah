@@ -328,7 +328,8 @@ func (p *UserHandler) userPreProcessParam(w http.ResponseWriter, r *http.Request
 
 	}
 	errlog.Trace.Printf("id supplied=%s\n", id)
-	return strings.ToUpper(id), nil
+	return id, nil
+	// return strings.ToUpper(id), nil
 }
 
 // func preProcessBody() reads the request's body and returns

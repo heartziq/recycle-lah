@@ -23,15 +23,16 @@ var (
 	}
 )
 
-func createServer() http.Handler {
+func createServer(db *sql.DB) http.Handler {
 	// db, err := sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle")
 	db, err := sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
-
+	handlers.DBCon = db
 	// Initialize handlers
 	pickup := handlers.CreatePickupHandler(db, "")
+	recycleBinHandler := handlers.CreateRBinHandler(db, "")
 	reward := handlers.CreateRewardHandler(db, "")
 	user := handlers.CreateUserHandler(db, "")
 	router := mux.NewRouter() // Main Router
@@ -102,17 +103,38 @@ func createServer() http.Handler {
 	subRReward.Use(middleware.VerifyAPIKey)
 	subRReward.Use(middleware.ValidateJWTToken)
 
+	// added by sook to test whether backup is ok
 	// Public route
 	router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
 	// recycle
-	router.HandleFunc("/api/v1/recycle", handlers.Recylce)
+	// router.HandleFunc("/api/v1/recycle", handlers.Recylce)
+	//
+	// endpoint: RecycleBin //
+	//
+	router.
+		Methods("GET", "POST").
+		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
+		Handler(recycleBinHandler)
 
+	// // recyblebindetails
+	// router.HandleFunc("/api/v1/recyclebindetails", handlers.GetAllBinDetails)
+	// router.HandleFunc("/api/v1/recyclebindetails/feedback", handlers.UpdateBinFeedback)
+	// // router.HandleFunc("/api/v1/recyclebindetails/feedback/{userID}",
+	// // queryBinFeedback).Methods("GET")
+	// router.HandleFunc("/api/v1/recyclebindetails/feedback/{userID}",
+	// 	handlers.QueryBinFeedback)
 	return router
 }
 
 func main() {
+	// create db connect
+	db, err := sql.Open("mysql", "admin:password@tcp(127.0.0.1:3306)/recycle?parseTime=true")
+	if err != nil {
+		panic(err)
+	}
+
 	// Instantiate server
-	router := createServer()
+	router := createServer(db)
 
 	// Serve
 	go func() {
@@ -128,7 +150,8 @@ func main() {
 
 	// Do some cleaning ups before shutdown
 	log.Println("INterrupt.. closing connection...")
-	log.Println("Doing cleanup...")
+	if err := db.Close(); err != nil { // Close db connection
+		log.Printf("error closing db connection: %v", err)
+	}
 	log.Println("done cleaning up")
-
 }

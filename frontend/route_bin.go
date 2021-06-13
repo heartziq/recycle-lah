@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"frontend/errlog"
 	"io/ioutil"
 	"net/http"
 )
@@ -35,6 +36,13 @@ func IndexBin(res http.ResponseWriter, req *http.Request) {
 // Get and send user feedback.
 func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
+		sess, err := getSession(req)
+		errlog.Trace.Println(sess)
+		if err != nil {
+			errlog.Error.Println("error getting session")
+			return
+		}
+		userID := sess.userId
 
 		binFeedbacks := RecycleBinDetails{
 			ID:              0,
@@ -44,7 +52,7 @@ func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 			BinLocationLong: 0,
 			BinAddress:      req.FormValue("Binaddress"),
 			Postcode:        req.FormValue("postcode"),
-			UserID:          "Lanzs", //To be puck in.
+			UserID:          userID, //To be puck in.
 			FBoptions:       req.FormValue("FBoptions"),
 			ColorCode:       req.FormValue("binfull"),
 			Remarks:         req.FormValue("remarks"),
@@ -60,7 +68,9 @@ func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 
 		// apiCode := binFeedbacks.BinID
 		fmt.Println("Sending User FB Via POST")
-		response, err := http.Post(baseURLBin+"/feedback", "application/json", bytes.NewBuffer(jsonString)) //POST to create course.
+		// response, err := http.Post(baseURLBin+"/feedback", "application/json", bytes.NewBuffer(jsonString)) //POST to create course.
+		// CHANGE June13
+		response, err := http.Post(baseURLBin+"/NIL", "application/json", bytes.NewBuffer(jsonString)) //POST to create course.
 		// response, err := http.Post(baseURL+"/"+apiCode, "application/json", bytes.NewBuffer(jsonString)) //POST to create course.
 
 		if err != nil {
@@ -80,11 +90,19 @@ func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 func queryFB(res http.ResponseWriter, req *http.Request) {
 	fmt.Println("Show user past Feedback with status.")
 	var feedBacks []RecycleBinDetails
-	userID := "Lanzs"
+
+	sess, err := getSession(req)
+	errlog.Trace.Println(sess)
+	if err != nil {
+		errlog.Error.Println("error getting session")
+		return
+	}
+	userID := sess.userId
 
 	fmt.Println(baseURLBin + "/feedback/" + userID)
-	response, err := http.Get(baseURLBin + "/feedback/" + userID)
-
+	// response, err := http.Get(baseURLBin + "/feedback/" + userID)
+	// CHANGE June13
+	response, err := http.Get(baseURLBin + "/" + userID)
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
@@ -105,8 +123,9 @@ func queryFB(res http.ResponseWriter, req *http.Request) {
 
 // show only recyclebins.
 func showRecycleBins(res http.ResponseWriter, req *http.Request) {
-
-	response, err := http.Get(baseURLBin)
+	// response, err := http.Get(baseURLBin)
+	// CHANGE JUNE13
+	response, err := http.Get(baseURLBin + "/NIL")
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
