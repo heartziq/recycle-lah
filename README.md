@@ -24,10 +24,10 @@ go run server.go
 
 ### RecycleBinDetails
 
-| GET ``` https://localhost:5000/api/v1/recyclebindetails/{userId}``` | Get specific user recyclebin feedback    |
-| ------------------------------------------------------------ | ---------------------------------------- |
-| GET ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | Get All feedback i.e. where userId='NIL' |
-| POST ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | Add new recycleBin entry to DB           |
+| GET ``` https://localhost:5000/api/v1/recyclebindetails/{userId}``` | Get specific user recyclebin feedback via their UserID |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+| GET ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | Get all physical bin inventory i.e. where userId='NIL' |
+| POST ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | add user feedback entry to DB                          |
 
 ### Pickups
 
