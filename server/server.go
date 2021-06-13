@@ -29,7 +29,7 @@ func createServer(db *sql.DB) http.Handler {
 	if err != nil {
 		panic(err)
 	}
-	handlers.DBCon = db
+	// handlers.DBCon = db
 	// Initialize handlers
 	pickup := handlers.CreatePickupHandler(db, "")
 	recycleBinHandler := handlers.CreateRBinHandler(db, "")
@@ -42,7 +42,8 @@ func createServer(db *sql.DB) http.Handler {
 	// URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/pickups/{id:\\d+}").
+		// Path("/api/v1/pickups/{id:\\d+}").
+		Path("/api/v1/pickups/{id}").
 		Queries("key", "{key}").
 		// Queries("limit", "{limit}").
 		Queries("role", "{role:user|collector}").
