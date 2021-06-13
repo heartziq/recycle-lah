@@ -45,7 +45,7 @@ func createServer(db *sql.DB) http.Handler {
 	//
 	router.
 		Methods("GET", "POST").
-		Path("/api/v1/recyclebindetails/{userID:\\d*|NIL}"). // set to NIL or integer
+		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
 		Handler(recycleBinHandler)
 
 	return router
