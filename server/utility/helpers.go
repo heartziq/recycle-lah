@@ -70,7 +70,7 @@ func GenToken(secret, userid string) (string, error) {
 // VerifyToken checks if provided token is valid -> return true if valid
 // error can be: "token expired", "invalid token"
 // anything else will throw error unknown
-func VerifyToken(tokenString string) (bool, error) {
+func VerifyToken(tokenString string) (string, error) {
 	// Verify
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(KEY), nil
@@ -82,22 +82,28 @@ func VerifyToken(tokenString string) (bool, error) {
 			if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 				// Token has expired
 				log.Println("token expired")
-				return false, errors.New("token expired")
+				return "", errors.New("token expired")
 			}
 		}
 
 		log.Println("invalid token")
-		return false, errors.New("invalid token")
+		return "", errors.New("invalid token")
 
 	}
+
+	// fmt.Printf("dynamic type: %T\n", token.Claims)
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		log.Println("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
-		log.Println("Token is valid.")
-		return true, nil
+		userid := claims["aud"]
+		if v, ok := userid.(string); ok {
+			log.Println("Token is valid.")
+			return v, nil
+		}
+
+		// return "", errors.New("invalid token")
 	}
 
-	return false, errors.New("Unknown error")
+	return "", errors.New("Unknown error")
 
 }
 
