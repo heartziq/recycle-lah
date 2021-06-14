@@ -47,6 +47,71 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 	} else {
 		url = url + "user"
 	}
+	errlog.Trace.Println("url=", url)
+	apiReq, err := http.NewRequest("GET", url, nil)
+
+	bearer := "Bearer " + sess.token
+	apiReq.Header.Add("Authorization", bearer)
+	apiReq.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	errlog.Trace.Println("bearer=", bearer)
+	response, err := client.Do(apiReq)
+
+	// client := &http.Client{}
+
+	// response, err := client.Get(url)
+	if err != nil {
+		errlog.Error.Println("client.Get")
+		setFlashCookie(w, "Applicatin error (500)")
+		message(w, r)
+		return
+	}
+
+	data.UserName = sess.userName
+	data1, err := ioutil.ReadAll(response.Body)
+
+	errlog.Trace.Println("data1=", data1)
+	defer response.Body.Close()
+	if err != nil {
+		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())
+		setFlashCookie(w, "Applicatin error (500)")
+		message(w, r)
+		return
+	}
+	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+	json.Unmarshal(data1, &data.PickupList)
+	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
+
+	executeTemplate(w, "user_pickup_list.gohtml", data)
+	// }
+}
+
+func OlduserPickupList(w http.ResponseWriter, r *http.Request) {
+	errlog.Trace.Println("\n\n***userPickupList***")
+
+	data := struct {
+		PageName   string
+		UserName   string
+		PickupList []pickup
+		MsgToUser  string
+	}{PageName: "Requested List"}
+
+	//  get data from session
+
+	sess, err := getSession(r)
+	errlog.Trace.Println(sess)
+	if err != nil {
+		errlog.Error.Println("error getting session")
+		setFlashCookie(w, "Unauthorized access")
+		message(w, r)
+		return
+	}
+	url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role="
+	if sess.isCollector {
+		url = url + "collector"
+	} else {
+		url = url + "user"
+	}
 
 	client := &http.Client{}
 	errlog.Trace.Println("url=", url)
@@ -145,9 +210,12 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 		errlog.Trace.Println("response.Header=", response.Header)
 		errlog.Trace.Println("response.Body=", string(data1))
 		if string(data1) == "inserted" {
+			data.MsgToUser = "Request submitted"
 			// message to Sin Yaw: if inserted means successful, can show message to say successful or just redirect baco to main menu
-			http.Redirect(w, r, "welcome", http.StatusFound)
-			return
+			// http.Redirect(w, r, "welcome", http.StatusFound)
+			// return
+		} else {
+			data.MsgToUser = "Failed to submit request."
 		}
 		//  if successful - should do a redirect
 	} //  if Post

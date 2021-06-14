@@ -182,6 +182,7 @@ func (p *UserHandler) methodDeleteUser(w http.ResponseWriter, r *http.Request, i
 // func addUser() inserts a new user record into the database.  It returns
 // error if error encountered.
 func (p *UserHandler) addUser(db *sql.DB, user dbNewUser) error {
+	errlog.Trace.Println("email=", user.email)
 	results, err := db.Exec("INSERT INTO user (id, password, email, user_name, is_collector) VALUES (?,?,?,?,?)", user.id, user.password, user.email, user.userName, user.collector)
 	if err != nil {
 		errlog.Error.Println("Error in db.Exec - insert into user", err)

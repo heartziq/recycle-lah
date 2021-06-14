@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	errlog "github.com/heartziq/recycle-lah/server/utility"
+	middleware "github.com/heartziq/recycle-lah/server/utility"
 )
 
 var (
@@ -50,12 +51,6 @@ var (
 		`,
 	}
 )
-
-// type RecycleLahHandler interface {
-// 	http.Handler
-// 	UseDb(db *sql.DB) error
-// 	SetTemplate(path string)
-// }
 
 type pickup struct {
 	Id        string  `json:"id"`
@@ -157,6 +152,7 @@ func (p *PickupHandler) requestPickup(pu *pickup) error {
 }
 
 func (p *PickupHandler) acceptPickup(pickup_id, collector_id string) error {
+	errlog.Trace.Println("pickup id:", pickup_id, "collector:", collector_id)
 	results, err := p.Db.Exec("UPDATE pickups SET attend_by=? WHERE id=?;", collector_id, pickup_id)
 	if err != nil {
 		return errors.New("error updating record")
@@ -182,7 +178,6 @@ func (p *PickupHandler) showPickupInProgress(user_id string) (users []*pickup) {
 	errlog.Trace.Println("showPickupInProgress userid=", user_id)
 	// access db
 
-	// results, err := p.Db.Query(DBQuery["GetAllPickups"])
 	results, err := p.Db.Query(DBQuery["GetPickupInProgress"], user_id)
 	if err != nil {
 
@@ -266,15 +261,18 @@ func (p *PickupHandler) deletePickup(pickup_id string) error {
 func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// User
 	vars := mux.Vars(r)
-	// limit := vars["limit"]
 	role := vars["role"]
 	pickup_id := vars["id"]
 
 	if role == "user" {
 		switch r.Method {
 		case "GET": // Show MY pickup in-progress
-
-			result := p.showPickupInProgress("SOOK6666") // replace "12345" with user_id
+			userId, err := middleware.GetUserId(r)
+			if err != nil {
+				log.Println(err)
+			}
+			errlog.Trace.Println("userid=", userId)
+			result := p.showPickupInProgress(userId) // replace "12345" with user_id
 			w.WriteHeader(http.StatusAccepted)
 			errlog.Trace.Printf("result=[%v], &result=[%v]\n", result, &result)
 			for _, v := range result {
@@ -282,7 +280,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			json.NewEncoder(w).Encode(result)
-			return // return added by Sook
+			// return // return added by Sook
 		case "POST": // Request for pickup (status, desc and weight_range, creation_date, updated_date)
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -307,26 +305,11 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("inserted"))
 		case "PUT": // Approve a pickup
-			// reqBody, err := io.ReadAll(r.Body)
-			// if err != nil {
-			// 	w.WriteHeader(http.StatusBadRequest)
-			// 	w.Write([]byte("error parsing body"))
-			// 	return
-			// }
-			// payload := map[string]string{}
-			// json.Unmarshal(reqBody, &payload)
 			p.approvePickup(pickup_id)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("approve successful!"))
 
 		case "DELETE": // Cancel a pickup
-			// body, err := io.ReadAll(r.Body)
-			// if err != nil {
-			// 	panic(err)
-
-			// }
-			// payload := map[string]string{}
-			// json.Unmarshal(body, &payload)
 			if err := p.deletePickup(pickup_id); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("sql/server error -- operation aborted!"))
@@ -340,12 +323,21 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// collector
 		switch r.Method {
 		case "GET": // show current pickup that I am attending
-			result := p.showAcceptedPickups("54321")
+			userId, err := middleware.GetUserId(r)
+			if err != nil {
+				log.Println(err)
+			}
+			errlog.Trace.Println("userid=", userId)
+			// result := p.showAcceptedPickups("54321")
+			result := p.showAcceptedPickups(userId)
+			errlog.Trace.Println("userid=", userId, result)
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
 		case "PUT": // cancel or accept (0,1,2,9)
 			reqBody, err := ioutil.ReadAll(r.Body)
+
 			if err == nil {
+
 				payload := map[string]string{}
 				json.Unmarshal(reqBody, &payload)
 				log.Println("[collector] accept a pickup")

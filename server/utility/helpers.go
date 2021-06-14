@@ -48,8 +48,7 @@ func initSecretKey() string {
 func GenToken(secret, userid string) (string, error) {
 
 	mySigningKey := []byte(secret)
-	// expiryDate := time.Now().Add(time.Hour * 24 * 7).Unix()
-	expiryDate := time.Now().Add(time.Minute * 30).Unix()
+	expiryDate := time.Now().Add(time.Hour * 24 * 7).Unix()
 	// get userid
 
 	// Create the Claims
@@ -71,7 +70,7 @@ func GenToken(secret, userid string) (string, error) {
 // VerifyToken checks if provided token is valid -> return true if valid
 // error can be: "token expired", "invalid token"
 // anything else will throw error unknown
-func VerifyToken(tokenString string) (bool, error) {
+func xVerifyToken(tokenString string) (bool, error) {
 	// Verify
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(KEY), nil
@@ -102,6 +101,48 @@ func VerifyToken(tokenString string) (bool, error) {
 
 }
 
+// VerifyToken checks if provided token is valid -> return true if valid
+// error can be: "token expired", "invalid token"
+// anything else will throw error unknown
+func VerifyToken(tokenString string) (string, error) {
+	Trace.Println("in verifyToken")
+	// Verify
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(KEY), nil
+	})
+
+	if err != nil {
+		Trace.Println("there is error ", err)
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+				// Token has expired
+				log.Println("token expired")
+				return "", errors.New("token expired")
+			}
+		}
+
+		log.Println("invalid token")
+		return "", errors.New("invalid token")
+
+	}
+
+	Trace.Printf("dynamic type: %T\n", token.Claims)
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userid := claims["aud"]
+		Trace.Println("userid=", userid)
+		if v, ok := userid.(string); ok {
+			log.Println("Token is valid.")
+			return v, nil
+		}
+
+		// return "", errors.New("invalid token")
+	}
+	Trace.Println("after claims (error)")
+	return "", errors.New("Unknown error")
+
+}
+
 // VerifyPassword checks if password is correct
 func VerifyPassword(hashedPassword []byte, password string) bool {
 	err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
@@ -123,36 +164,24 @@ func HashPassword(password string) []byte {
 	}
 }
 
+// to retrieve user id from token in request header
 // not working
 func GetUserId(r *http.Request) (string, error) {
 	Trace.Println("============ get user id  =====================")
-	tokenString := r.Header.Get("Authorization")
-	Trace.Println("Token=", tokenString)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(KEY), nil
-	})
+	mechanism := strings.Split(r.Header.Get("Authorization"), " ")
+	if len(mechanism) > 1 && mechanism[0] == "Bearer" {
+		if token := mechanism[1]; token != "" {
+			userId, err := VerifyToken(token)
 
-	if err != nil {
-
-		if ve, ok := err.(*jwt.ValidationError); ok {
-			if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-				// Token has expired
-				log.Println("token expired")
-				return "", errors.New("token expired")
+			// validate token
+			if err != nil {
+				Trace.Println(err)
+				return "", err
 			}
+			Trace.Println(userId)
+			return userId, nil
 		}
 
-		log.Println("invalid token")
-		return "", errors.New("invalid token")
-
 	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		Info.Printf("Welcome, ", claims["aud"]) // claims["aud"] will hold the userid
-		Info.Println("Token is valid.")
-		// userId := fmt.Sprintf(claims["aud"])  //  stuck - do not how to convert to string
-		return "sook6666", nil
-	}
-
 	return "", errors.New("error getting userid from token")
 }

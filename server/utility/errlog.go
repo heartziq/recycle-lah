@@ -32,17 +32,17 @@ func init() {
 	if err != nil {
 		log.Panicln(err)
 	}
-	Trace = log.New(io.MultiWriter(logFile, os.Stdout), "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
+	Trace = log.New(io.MultiWriter(os.Stdout), "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
 	// if discardTrace() {
 	// 	Trace = log.New(ioutil.Discard, "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
 	// } else {
 	// 	Trace = log.New(io.MultiWriter(logFile, os.Stdout), "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
 	// }
-	Info = log.New(io.MultiWriter(logFile, os.Stdout), "Info: ", log.Ldate|log.Ltime|log.Lshortfile)
+	Info = log.New(io.MultiWriter(os.Stdout), "Info: ", log.Ldate|log.Ltime|log.Lshortfile)
 	// Info = log.New(logFile, "Info: ", log.Ldate|log.Ltime|log.Lshortfile)
 	Warning = log.New(io.MultiWriter(errFile, logFile, os.Stderr), "Warning :", log.Ldate|log.Ltime|log.Lshortfile)
 	// Error = log.New(io.MultiWriter(errFile, logFile), "Error: ", log.Ldate|log.Ltime|log.Lshortfile)
-	Error = log.New(io.MultiWriter(errFile, logFile, os.Stderr), "Error: ", log.Ldate|log.Ltime|log.Lshortfile)
+	Error = log.New(io.MultiWriter(errFile, os.Stderr), "Error: ", log.Ldate|log.Ltime|log.Lshortfile)
 	Panic = log.New(io.MultiWriter(panicFile, errFile, logFile, os.Stderr), "Panic: ", log.Ldate|log.Ltime|log.Lshortfile)
 	Trace.Println("errlog:logger.go - init()")
 }

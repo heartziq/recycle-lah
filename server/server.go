@@ -61,62 +61,21 @@ func createServer(db *sql.DB) http.Handler {
 		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
 		Handler(recycleBinHandler)
 
-	// // Protected route - need to supply API_KEY
-	// subR := router.NewRoute().Subrouter()
-	// // URI: https://localhost:5000/api/v1/pickups/4?key=secretkey&limit=true&role=collector
-	// subR.
-	// 	Methods("GET", "PUT", "POST", "DELETE").
-	// 	// Path("/api/v1/pickups/{id:\\d+}").
-	// 	Path("/api/v1/pickups/{id}").
-	// 	Queries("key", "{key}").
-	// 	// Queries("limit", "{limit}").
-	// 	Queries("role", "{role:user|collector}").
-	// 	Handler(pickUpHandler)
-
-	// subR.Use(middleware.VerifyAPIKey)
-
-	// // test
-	// if v, ok := handlersList["test"].(*handlers.Test); ok {
-	// 	v.UseDb(db)
-	// 	// v.SetTemplate("templates/test/*")
-	// }
-
-	// //
-	// // A route "test" that use AddAuthHeader middleware
-	// //
-	// subR = router.NewRoute().Subrouter()
-	// subR.
-	// 	Methods("GET", "PUT", "POST", "DELETE").
-	// 	Path("/api/v1/test/{id:\\d+}").
-	// 	Queries("key", "{key}").
-	// 	Handler(handlersList["test"])
-
-	// subR.Use(middleware.AddAuthHeader)
-
-	// /*
-
-	// users
-	// URI: http://localhost:5000/api/v1/users/user2345?key=secretkey with json data struct: NewUser
-	// curl -H "Content-Type: application/json" -X POST http://localhost:5000/api/v1/users/user4567?key=secretkey -d {\"password\":\"password\",\"email:\":\"mail\",\"collector\":false}
-	// v2: curl -H "Content-Type: application/json" -X POST http://localhost:5000/api/v1/users/curl1111?key=secretkey -d {\"password\":\"password\",\"email:\":\"curl1111@gmail.com\",\"user_name\":\"curl1111_cat\",\"collector\":false}
-	// curl -H "Content-Type: application/json" -X DELETE http://localhost:5000/api/v1/users/user4567?key=secretkey
-	// curl -X GET http://localhost:5000/api/v1/users/USER1234?key=secretkey
-	// curl -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/users/USER4567?key=secretkey -d {\"password\":\"password\"}
-	// PUT for change password and username
+	//
+	// endpoint: users //
+	//
 	subRUser := router.NewRoute().Subrouter()
 	subRUser.
 		Methods("GET", "PUT", "POST", "DELETE").
 		Path("/api/v1/users/{id:[[:alnum:]]+}").
 		Queries("key", "{key}").
-		// HandlerFunc(userhandler.Users)
 		Handler(user)
 	subRUser.Use(middleware.HttpLog)
 	subRUser.Use(middleware.VerifyAPIKey)
 
-	// reward points for user
-	// PUT will update the points by the amount supplied in the request
-	// curl -X GET http://localhost:5000/api/v1/rewards/USER1234?key=secretkey
-	// curl -X PUT http://localhost:5000/api/v1/rewards/USER1234?key=secretkey -d {\"reward_points\":3}
+	//
+	// endpoint: rewards //
+	//
 	subRReward := router.NewRoute().Subrouter()
 	subRReward.
 		Methods("GET", "PUT").
@@ -128,19 +87,6 @@ func createServer(db *sql.DB) http.Handler {
 	subRReward.Use(middleware.VerifyAPIKey)
 	subRReward.Use(middleware.ValidateJWTToken)
 
-	// added by sook to test whether backup is ok
-	// Public route
-	// router.HandleFunc("/api/v1/pickups", pickup.ShowPickup())
-	// recycle
-	// router.HandleFunc("/api/v1/recycle", handlers.Recylce)
-
-	// // recyblebindetails
-	// router.HandleFunc("/api/v1/recyclebindetails", handlers.GetAllBinDetails)
-	// router.HandleFunc("/api/v1/recyclebindetails/feedback", handlers.UpdateBinFeedback)
-	// // router.HandleFunc("/api/v1/recyclebindetails/feedback/{userID}",
-	// // queryBinFeedback).Methods("GET")
-	// router.HandleFunc("/api/v1/recyclebindetails/feedback/{userID}",
-	// 	handlers.QueryBinFeedback)
 	return router
 }
 

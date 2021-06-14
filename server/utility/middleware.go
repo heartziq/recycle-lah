@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// func VerifyAPIKey() verify API key provided in the param
 func VerifyAPIKey(next http.Handler) http.Handler {
 	newHandlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -50,7 +51,7 @@ func Logging(next http.Handler) http.Handler {
 	})
 }
 
-// handler
+// func HttpLog provides logging of the name of the next function/handler
 func HttpLog(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := runtime.FuncForPC(reflect.ValueOf(next).Pointer()).Name()
@@ -60,37 +61,30 @@ func HttpLog(next http.Handler) http.Handler {
 
 }
 
-// handlerFunc
-func HttpLog1(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		name := runtime.FuncForPC(reflect.ValueOf(h).Pointer()).Name()
-		Info.Println("httpLog: Handler called - " + name)
-		h(w, r)
-	}
-}
+//  func VerifyHdrToken() get token from header and call VerifyToken - not in used
+//  replaced by ValidateJWTToken()
+// func VerifyHdrToken(next http.Handler) http.Handler {
+// 	newHandlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		token := r.Header.Get("Authorization")
+// 		Trace.Println("Token=", token)
+// 		verified, err := VerifyToken(token)
+// 		if err != nil {
+// 			Error.Println(err)
+// 			http.Error(w, err.Error(), http.StatusUnauthorized) // 401	- unable to verified???
+// 			return
+// 		}
+// 		Trace.Println("verified=", verified)
+// 		if verified {
+// 			next.ServeHTTP(w, r)
+// 			return
+// 		}
+// 		http.Error(w, "Forbidden Access - Invalid TOKEN provided", http.StatusUnauthorized) // 401
+// 	})
 
-func VerifyHdrToken(next http.Handler) http.Handler {
-	Trace.Println("============ verifying token =====================")
-	newHandlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		Trace.Println("Token=", token)
-		verified, err := VerifyToken(token)
-		if err != nil {
-			Error.Println(err)
-			http.Error(w, err.Error(), http.StatusUnauthorized) // 401	- unable to verified???
-			return
-		}
-		Trace.Println("verified=", verified)
-		if verified {
-			next.ServeHTTP(w, r)
-			return
-		}
-		http.Error(w, "Forbidden Access - Invalid TOKEN provided", http.StatusUnauthorized) // 401
-	})
+// 	return newHandlerFunc
+// }
 
-	return newHandlerFunc
-}
-
+// func ValidateJWTToken() verifies JWT token
 func ValidateJWTToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -104,7 +98,6 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 				if _, err := VerifyToken(token); err != nil {
 					log.Printf("Validate token err: %v\n", err.Error())
 					if err.Error() == "token expired" {
-						// http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
 						http.Error(w, err.Error(), http.StatusUnauthorized)
 						return
 					}
@@ -122,45 +115,6 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 
 		}
 
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("401 - Status Unauthorized"))
-
-	})
-}
-
-func ValidateJWTToken_Sook(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		Trace.Println("Sook in ValidateJWTToken")
-		// Reject anything other than Bearer
-		// expect var 'mechanism' to be []string{"Bearer", "TOKEN_STRING"}
-		mechanism := strings.Split(r.Header.Get("Authorization"), " ")
-		Trace.Println("Sook in mechanism=", mechanism)
-		if len(mechanism) > 1 && mechanism[0] == "Bearer" {
-			Trace.Println("Sook in if len")
-			if token := mechanism[1]; token != "" {
-				Trace.Println("Sook in if token")
-				// validate token
-				if _, err := VerifyToken(token); err != nil {
-					log.Printf("Validate token err: %v\n", err.Error())
-					if err.Error() == "token expired" {
-						http.Error(w, err.Error(), http.StatusUnauthorized)
-						// http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
-						return
-					}
-					Trace.Println("Sook in veriftoken err not nil ")
-					http.Error(w, "Invalid Token - Authorization Failed", http.StatusUnauthorized)
-
-					return
-
-				}
-				Trace.Println("Sook in ValidateJWTToken - token verified")
-				next.ServeHTTP(w, r)
-				return
-
-			}
-
-		}
-		Trace.Println("Sook in ValidateJWTToken -last part")
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("401 - Status Unauthorized"))
 

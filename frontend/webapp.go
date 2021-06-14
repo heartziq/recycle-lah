@@ -160,7 +160,9 @@ func main() {
 // }
 
 func setupHandles() {
-	http.HandleFunc("/", httpLog(index))
+	// for testing
+	http.HandleFunc("/", httpLog(indexSook))
+	// http.HandleFunc("/", httpLog(index))
 
 	http.HandleFunc("/signin", httpLog(login))
 	http.HandleFunc("/logout", httpLog(logout))
@@ -185,6 +187,10 @@ func setupHandles() {
 
 	// Sook for testing only
 	http.HandleFunc("/index_sook", httpLog(indexSook))
+	http.HandleFunc("/dummyDeleteTask", httpLog(dummyCalldeletePickup))
+	http.HandleFunc("/dummyShowAllAvailJobsforCollector", httpLog(dummyCallCollectorShowJobsAvailable))
+	http.HandleFunc("/dummyAcceptJob", httpLog(dummyCalldummyacceptJob))
+	http.HandleFunc("/dummyViewAssignedJob", httpLog(dummyViewAttendingJob))
 	// Sook - create new account
 	// http.HandleFunc("/newusersook", httpLog(httpLog(createAccount)))
 
