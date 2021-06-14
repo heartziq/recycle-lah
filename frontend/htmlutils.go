@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -11,7 +10,9 @@ import (
 	"frontend/errlog"
 )
 
-// logs http calls
+// func httpLog() accepts a handlerfunc and returns anonymous (handlerfunc) function
+// that print out the name of the HandlerFunc and call the HandlerFunc
+// It is part of the chaining handlers
 func httpLog(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := runtime.FuncForPC(reflect.ValueOf(h).Pointer()).Name()
@@ -20,16 +21,7 @@ func httpLog(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// func executeTemplate1(w http.ResponseWriter, data interface{}, files ...string) {
-// 	var tmplList []string
-// 	for _, file := range files {
-// 		tmplList = append(tmplList, fmt.Sprintf("templates/%s.gohtml", file))
-// 	}
-// 	templates := template.Must(template.ParseFiles(tmplList...))
-// 	templates.ExecuteTemplate(w, "layout", data)
-// }
-
-// executes templates and raises panic if error occurs
+// func executeTemplate() executes templates and raises panic if error occurs
 func executeTemplate(w http.ResponseWriter, filename string, data interface{}) {
 	err := tpl.ExecuteTemplate(w, filename, data)
 	if err != nil {
@@ -37,22 +29,7 @@ func executeTemplate(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// err := tpl.ExecuteTemplate(w, "index.gohtml", nil)
-// if err != nil {
-// 	// panicLog("Execute Template error ", err)
-// 	log.Panic(err)
-// }
-
-// func XparseTemplateFiles(filenames ...string) (t *template.Template) {
-// 	var files []string
-// 	t = template.New("layout")
-// 	for _, file := range filenames {
-// 		files = append(files, fmt.Sprintf("templates/%s.gohtml", file))
-// 	}
-// 	t = template.Must(t.ParseFiles(files...))
-// 	return
-// }
-
+// func getCookie to get cookie and returns cookie.value
 func getCookie(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("RecycleLah")
 	if err != nil {
@@ -61,16 +38,18 @@ func getCookie(r *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
-// gets and displays cookies (for debugging and testing purposes)
-func getCookie1(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("RecycleLah")
-	if err != nil {
-		fmt.Fprintln(w, "RecycleLah not found", err)
-	} else {
-		fmt.Fprintln(w, "RecycleLah :", cookie)
-	}
-}
+// // gets and displays cookies (for debugging and testing purposes)
+// func getCookie1(w http.ResponseWriter, r *http.Request) {
+// 	cookie, err := r.Cookie("RecycleLah")
+// 	if err != nil {
+// 		fmt.Fprintln(w, "RecycleLah not found", err)
+// 	} else {
+// 		fmt.Fprintln(w, "RecycleLah :", cookie)
+// 	}
+// }
 
+// func setFlashCookie() sets flash cookie to store message
+// the cookie is used to display message in subsequent page
 func setFlashCookie(w http.ResponseWriter, msg string) {
 	cookieValue := []byte(msg)
 	cookie := http.Cookie{
@@ -82,7 +61,7 @@ func setFlashCookie(w http.ResponseWriter, msg string) {
 	errlog.Trace.Printf("Set FlashCookie : %v\n", cookie)
 }
 
-// returns session details
+// func getFlashCookie returns cookie value (message)
 func getFlashCookie(w http.ResponseWriter, r *http.Request) (string, error) {
 	errlog.Trace.Println("In getFlashCookie")
 	c, err := r.Cookie("FlashCookie")
@@ -104,6 +83,7 @@ func getFlashCookie(w http.ResponseWriter, r *http.Request) (string, error) {
 	return string(msg), err
 }
 
+// func clearFlashCookie() set flash cookie to expire
 func clearFlashCookie(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("FlashCookie")
 	if err != nil {
@@ -124,34 +104,7 @@ func clearFlashCookie(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// // returns true when session information is created successfully
-// // returns false otherwise
-// func createSession(w http.ResponseWriter, userName string) bool {
-// 	defer func() {
-// 		errlog.Trace.Println("running defer func() in createSession():")
-// 		if r := recover(); r != nil {
-// 			errlog.Info.Println("Recovering from createSession()", r)
-// 		}
-// 	}()
-// 	id := uuid.NewV4()
-// 	cookie := http.Cookie{
-// 		Name:     "RecycleLah",
-// 		Value:    id.String(),
-// 		HttpOnly: true,
-// 	}
-// 	http.SetCookie(w, &cookie)
-// 	errlog.Trace.Printf("cookie set: %+v\n", cookie)
-// 	//  create session record
-// 	i := user.InsertSession(db, id.String(), userName)
-// 	if i == 0 { //  record not added
-// 		errlog.Error.Println("Failed to create session record for uuid:", id.String())
-// 		return false
-// 	}
-// 	return true
-// }
-
-// // returns session details
-// // func getSession(w http.ResponseWriter, r *http.Request) (Session, error) {
+// func getSession() returns cookie value which is the uuid
 func getSession(r *http.Request) (user, error) {
 	var currentUser user
 	c, err := r.Cookie("RecycleLah")
@@ -170,7 +123,7 @@ func getSession(r *http.Request) (user, error) {
 	return currentUser, err
 }
 
-// clears session details
+// func clearSession() clears session details (delete from Map)
 func clearSession(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("going to get Cookie")
 	cookie, err := r.Cookie("RecycleLah")
@@ -233,62 +186,9 @@ func fShortDate(input time.Time) string {
 	return input.Local().Format("02-Jan-2006")
 }
 
-// func checkAccess(h http.HandlerFunc) http.HandlerFunc {
-// 	errlog.Trace.Println("in checkAccess()")
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		sess, err := getSession(w, r)
-// 		if err != nil {
-// 			errlog.Error.Println("checkAdminAccess: Cookie not found, no access")
-// 			unauthorized(w, r)
-// 			return
-// 		}
-// 		errlog.Trace.Printf("checkAccess session:%+v", sess)
-// 		//  should include check to if session expires
-// 		h(w, r)
-// 	}
-// }
-
-// //  checkCollectorAccess check if a user (session details) has the access right
-// func checkCollectorAccess(h http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		//  get cookie
-// 		key, err := getCookie(r)
-// 		if err != nil {
-// 			// probably have not login in - access not allowed
-// 			errlog.Error.Println("Cookie not found, no access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			message(w, r)
-// 			return
-// 		}
-// 		//  check if session is expired
-// 		expired, collector, err := isSessionExpired(key)
-// 		if err != nil {
-// 			//  session data not found
-// 			errlog.Error.Println("Session data not found, no access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			message(w, r)
-// 			return
-// 		}
-// 		if expired {
-// 			setFlashCookie(w, "Your session has expired, please re-login")
-// 			message(w, r)
-// 			return
-// 		}
-// 		if !collector {
-// 			//  collector trying to access user web page
-// 			errlog.Info.Println("account has no user access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			// route to a message page
-// 			message(w, r)
-// 			return
-// 		}
-// 		errlog.Trace.Println("will route to the requested page")
-// 		h(w, r)
-// 		return
-
-// 	} // return func()
-// }
-
+// func isSessionExpired() checks if session has expired
+// return true if expired
+// return false if it is not
 func isSessionExpired(sessionKey string) (expired bool, collector bool, err error) {
 	key, ok := mapSessions[sessionKey]
 	if !ok {
@@ -302,7 +202,7 @@ func isSessionExpired(sessionKey string) (expired bool, collector bool, err erro
 		currentTime := time.Now().UnixNano() / int64(time.Second)
 		errlog.Trace.Println("time.Now():", int(time.Now().Unix()))
 		errlog.Trace.Println("currentTime:", currentTime)
-		if currentTime > (user.sessionCreatedTime + 60*60) {
+		if currentTime > (user.sessionCreatedTime + 120*60) { // in second
 			// delete the session data
 			delete(mapSessions, sessionKey)
 			delete(mapUsers, key)
@@ -316,108 +216,14 @@ func isSessionExpired(sessionKey string) (expired bool, collector bool, err erro
 	return true, collector, errSessionNotFound
 }
 
-// //  checkUserAccess check if a user (session details) has the access right
-// func checkAccess(h http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		//  get cookie
-// 		cookie, err := r.Cookie("RecycleLah")
-// 		if err != nil {
-// 			// probably have not login in - access not allowed
-// 			errlog.Error.Println("checkCollectorAccess: Cookie not found, no access")
-// 			index(w, r)
-// 		} else {
-// 			//  got cookie
-// 			if userSession, ok := mapSession[cookie.Value]; ok {
-// 				errlog.Trace.Println("session sessionCreatedTime date:", userSession.sessionCreatedTime)
-// 				// 	now1 = time.Now().UnixNano() / int64(time.Second)
-// 				currentTime := time.Now().UnixNano() / int64(time.Second)
-// 				errlog.Trace.Println("time.Now():", int(time.Now().Unix()))
-// 				errlog.Trace.Println("currentTime:", currentTime)
-// 				if currentTime > (userSession.sessionCreatedTime + 1*60) {
-// 					// delete the session data
-// 					delete(mapSession, cookie.Value)
-// 					errlog.Info.Println("Session has expired")
-// 					// how to inform session has expired
-// 					// route to a message page
-// 					setFlashCookie(w, "Your session has expired, please re-login")
-// 					message(w, r)
-// 					return
-// 				}
-// 				//  found session in session map
-// 				if !userSession.isCollector {
-// 					//  call handler as user has access
-// 					h(w, r)
-// 					return
-// 				} else {
-// 					// log access violation and render index page
-// 					errlog.Info.Println("account has no user access", userSession.userId)
-// 					setFlashCookie(w, "Unauthorized access")
-// 					// route to a message page
-// 					message(w, r)
-// 					return
-// 				}
-
-// 			} else {
-// 				//  cannot find session and render index page
-// 				errlog.Error.Println(w, "session data not found")
-// 				setFlashCookie(w, "Please login through our home page")
-// 				message(w, r)
-// 				return
-// 			}
-
-// 		}
-
-// 	}
-// }
-
-// //  checkUserAccess check if a user (session details) has the access right
-// func checkUserAccess(h http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		//  get cookie
-// 		key, err := getCookie(r)
-// 		if err != nil {
-// 			// probably have not login in - access not allowed
-// 			errlog.Error.Println("Cookie not found, no access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			message(w, r)
-// 			return
-// 		}
-// 		//  check if session is expired
-// 		expired, collector, err := isSessionExpired(key)
-// 		if err != nil {
-// 			//  session data not found
-// 			errlog.Error.Println("Session data not found, no access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			message(w, r)
-// 			return
-// 		}
-// 		if expired {
-// 			setFlashCookie(w, "Your session has expired, please re-login")
-// 			message(w, r)
-// 			return
-// 		}
-// 		if collector {
-// 			//  collector trying to access user web page
-// 			errlog.Info.Println("account has no user access")
-// 			setFlashCookie(w, "Unauthorized access")
-// 			// route to a message page
-// 			message(w, r)
-// 			return
-// 		}
-// 		errlog.Trace.Println("will route to the requested page")
-// 		h(w, r)
-// 		return
-
-// 	} // return func()
-// }
-
-//  checkAccess check if a user (session details) has the access right
+// func checkAccess() check if a user (session details) has the access right
+// It is used as a middleware in the handlers authentication
 func checkAccess(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//  get cookie
 		key, err := getCookie(r)
 		if err != nil {
-			// probably have not login in - access not allowed
+			// have not login in - access not allowed
 			errlog.Error.Println("Cookie not found, no access")
 			setFlashCookie(w, "Unauthorized access")
 			message(w, r)

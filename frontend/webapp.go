@@ -17,13 +17,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var tpl *template.Template
-var tplFuncs = template.FuncMap{"rangeStruct": RangeStructer, "fShortDate": fShortDate, "fmtDate": fmtDate}
-
 //application initialization
 func init() {
 	errlog.Trace.Println("main.go - init()")
-
 	tpl = template.Must(template.New("").Funcs(tplFuncs).ParseGlob("templates/*"))
 	files := http.FileServer(http.Dir("public"))
 	http.Handle("/static/", http.StripPrefix("/static/", files))
@@ -39,7 +35,10 @@ func main() {
 		}
 		cleanUp()
 	}()
+
+	// setup handlers
 	setupHandles()
+
 	// create http server
 	server := &http.Server{
 		Addr: ":5221",
@@ -75,95 +74,11 @@ func main() {
 	}
 }
 
-// func Sook_setupHandles() {
-// 	// Sook for testing only
-// 	http.HandleFunc("/index_sook", httpLog(indexSook))
-
-// 	http.HandleFunc("/", httpLog(index))
-// 	// Sook - create new account
-// 	http.HandleFunc("/newusersook", httpLog(httpLog(createAccount)))
-// 	http.HandleFunc("/signupsuccess", httpLog(httpLog(signUpSuccess)))
-// 	// Sook - login/logout
-// 	http.HandleFunc("/signin", httpLog(httpLog(login)))
-
-// 	http.HandleFunc("/welcome", httpLog(checkAccess(welcome)))
-// 	http.HandleFunc("/logout", httpLog(logout))
-// 	// reward points
-// 	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
-// 	http.HandleFunc("/request_pickup", requestPickup)
-// 	// user request for pick up
-// 	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
-// 	//Main Pages
-// 	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
-// 	http.HandleFunc("/menu", mainMenu)
-// 	http.HandleFunc("/newuser", httpLog(newUser))
-
-// 	// http.HandleFunc("/logout", logOut)
-// 	http.HandleFunc("/login", logIn)
-// 	// //Sub Pages
-// 	http.HandleFunc("/userupdate", userDetailUpdate)
-// 	// http.HandleFunc("/pickup", pickUp)
-// 	// http.HandleFunc("/viewstatus", viewStatus)
-// 	// added by Sook 12 June
-// 	http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
-
-// 	// recycle Bin
-// 	// recycleIndex
-// 	http.HandleFunc("/indexBin", IndexBin)
-// 	http.HandleFunc("/recyclebinsFB", recycleBinFB)
-// 	// Get user query pass feedback
-// 	http.HandleFunc("/queryFB", queryFB)
-// 	// show ALL recyclebins and FeedBack.
-// 	http.HandleFunc("/showrecyclebins", showRecycleBins)
-// }
-
-// func SinYaw_June13_setupHandles() {
-// 	// Sook for testing only
-// 	http.HandleFunc("/index_sook", httpLog(indexSook))
-
-// 	http.HandleFunc("/", httpLog(index))
-// 	// Sook - create new account
-// 	http.HandleFunc("/newusersook", httpLog(httpLog(createAccount)))
-// 	http.HandleFunc("/signupsuccess", httpLog(httpLog(signUpSuccess)))
-// 	// Sook - login/logout
-// 	http.HandleFunc("/signin", httpLog(httpLog(login)))
-
-// 	http.HandleFunc("/welcome", httpLog(checkAccess(welcome)))
-// 	http.HandleFunc("/logout", httpLog(logout))
-// 	// reward points
-// 	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
-// 	http.HandleFunc("/request_pickup", requestPickup)
-// 	// user request for pick up
-// 	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
-// 	//Main Pages
-// 	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
-// 	http.HandleFunc("/menu", mainMenu)
-// 	http.HandleFunc("/newuser", httpLog(newUser))
-
-// 	// http.HandleFunc("/logout", logOut)
-// 	http.HandleFunc("/login", logIn)
-// 	// //Sub Pages
-// 	http.HandleFunc("/userupdate", userDetailUpdate)
-// 	// http.HandleFunc("/pickup", pickUp)
-// 	// http.HandleFunc("/viewstatus", viewStatus)
-// 	// added by Sook 12 June
-// 	http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
-
-// 	// recycle Bin
-// 	// recycleIndex
-// 	http.HandleFunc("/indexBin", IndexBin)
-// 	http.HandleFunc("/recyclebinsFB", recycleBinFB)
-// 	// Get user query pass feedback
-// 	http.HandleFunc("/queryFB", queryFB)
-// 	// show ALL recyclebins and FeedBack.
-// 	http.HandleFunc("/showrecyclebins", showRecycleBins)
-// }
-
+// func setupHandles() setups handlers used in the application
 func setupHandles() {
-	// for testing
-	http.HandleFunc("/", httpLog(indexSook))
-	// http.HandleFunc("/", httpLog(index))
-
+	//  home page
+	http.HandleFunc("/", httpLog(index))
+	// login, logout, main menu
 	http.HandleFunc("/signin", httpLog(login))
 	http.HandleFunc("/logout", httpLog(logout))
 	http.HandleFunc("/welcome", httpLog(checkAccess(welcome)))
@@ -175,7 +90,8 @@ func setupHandles() {
 	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
 	// pickups
 	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
-	http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
+	http.HandleFunc("/request_pickup", httpLog(requestPickup))
+	// http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
 
 	// recycle Bin
 	http.HandleFunc("/indexBin", IndexBin)
@@ -191,18 +107,12 @@ func setupHandles() {
 	http.HandleFunc("/dummyShowAllAvailJobsforCollector", httpLog(dummyCallCollectorShowJobsAvailable))
 	http.HandleFunc("/dummyAcceptJob", httpLog(dummyCalldummyacceptJob))
 	http.HandleFunc("/dummyViewAssignedJob", httpLog(dummyViewAttendingJob))
-	// Sook - create new account
-	// http.HandleFunc("/newusersook", httpLog(httpLog(createAccount)))
 
-	// user request for pick up
-
-	//Main Pages
-	// http.HandleFunc("/mainmenu", httpLog(mainMenu))
-	http.HandleFunc("/menu", mainMenu)
+	// http.HandleFunc("/menu", mainMenu)
 
 	// http.HandleFunc("/logout", logOut)
 	// can delete ???
-	http.HandleFunc("/request_pickup", requestPickup)
-	http.HandleFunc("/login", logIn)
+
+	// http.HandleFunc("/login", logIn)
 
 }

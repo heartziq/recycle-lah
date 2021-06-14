@@ -25,11 +25,6 @@ func indexSook(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, "index_sook.gohtml", Data)
 }
 
-// //  contact()  provides contact detailss
-// func contact(w http.ResponseWriter, r *http.Request) {
-// 	executeTemplate(w, "contact.gohtml", nil)
-// }
-
 //  unauthorized()  shows error
 func unauthorized(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<h1>unauthorized access<h1>")

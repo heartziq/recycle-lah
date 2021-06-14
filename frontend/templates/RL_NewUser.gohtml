@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="en">
-{{ template "header" }}
+
+{{ template "header" .}}
 
 <body>
     {{template "BodyTitle" .}}
+    {{template "mainnavbar" .UserName}}
     <br>
     <h3 class="Application">Please enter user name, password and email for registration!</h3>
     <div class="Application">
