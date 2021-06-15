@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"frontend/errlog"
 )
@@ -21,13 +21,112 @@ type pickup struct {
 	Completed bool    `json:"completed"`
 }
 
+func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
+	errlog.Trace.Println("\n\n***userPickupList***")
+
+	data := struct {
+		PageName   string
+		UserName   string
+		PickupList map[string]pickup
+		MsgToUser  string
+	}{PageName: "Requested List"}
+
+	//  get data from session
+	sess, err := getSession(r)
+	errlog.Trace.Println(sess)
+	if err != nil {
+		errlog.Error.Println("error getting session")
+		setFlashCookie(w, "Unauthorized access")
+		message(w, r)
+		return
+	}
+	url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role="
+	if sess.isCollector {
+		url = url + "collector"
+	} else {
+		url = url + "user"
+	}
+
+	apiReq, err := http.NewRequest("GET", url, nil)
+
+	bearer := "Bearer " + sess.token
+	apiReq.Header.Add("Authorization", bearer)
+	apiReq.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	errlog.Trace.Println("bearer=", bearer)
+	response, err := client.Do(apiReq)
+
+	// client := &http.Client{}
+	// errlog.Trace.Println("url=", url)
+	// response, err := client.Get(url)
+	if err != nil {
+		errlog.Error.Println("client.Get")
+		setFlashCookie(w, "Applicatin error (500)")
+		message(w, r)
+		return
+	}
+
+	data.UserName = sess.userName
+	data1, err := ioutil.ReadAll(response.Body)
+
+	errlog.Trace.Println("data1=", string(data1))
+	defer response.Body.Close()
+	if err != nil {
+		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())
+		setFlashCookie(w, "Applicatin error (500)")
+		message(w, r)
+		return
+	}
+	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+	var allListitems []pickup
+	var mapPickup = map[string]pickup{}
+	json.Unmarshal(data1, &allListitems)
+	for _, v := range allListitems {
+		if v.Completed {
+			mapPickup[v.Id] = v
+		}
+	}
+	data.PickupList = mapPickup
+
+	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
+
+	if r.Method == http.MethodPost {
+		var jobs []string
+		for k, v := range mapPickup {
+			errlog.Trace.Printf("key, value: %v, %v", k, v)
+			tf := r.FormValue(string(k))
+			if tf != "" {
+				jobs = append(jobs, tf)
+			}
+		}
+		errlog.Trace.Println("getback", jobs)
+		for _, v := range jobs {
+			var job map[string]string
+			job = make(map[string]string)
+			job["pickup_id"] = v
+			job["collector_id"] = ""
+			completedJob(job)
+		}
+
+		// update backend
+
+		// if string(data1) == "Update record(s)" {
+		// 	return
+		// }
+		http.Redirect(w, r, "/welcome", http.StatusSeeOther)
+	}
+
+	executeTemplate(w, "view_completed_jobs.gohtml", data)
+	// }
+}
+
 func userPickupList(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("\n\n***userPickupList***")
 
 	data := struct {
 		PageName   string
 		UserName   string
-		PickupList map[int]pickup
+		PickupList map[string]pickup
 		MsgToUser  string
 	}{PageName: "Requested List"}
 
@@ -79,53 +178,37 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 	}
 	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
 	var allListitems []pickup
-	mapPickup := map[int]pickup{}
+	var mapPickup = map[string]pickup{}
 	json.Unmarshal(data1, &allListitems)
-	for i, v := range allListitems {
-		mapPickup[i] = v
+	for _, v := range allListitems {
+		if !v.Completed {
+			mapPickup[v.Id] = v
+		}
 	}
 	data.PickupList = mapPickup
 
 	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
 
 	if r.Method == http.MethodPost {
-		var pickupCompleted []pickup
-		for i := 0; i < len(data.PickupList); i++ {
-			id := strconv.Itoa(i)
-			fmt.Printf("%T - %v", id, id)
-			tf := r.FormValue(string(id))
+		var jobs []string
+		for k, v := range mapPickup {
+			errlog.Trace.Printf("key, value: %v, %v", k, v)
+			tf := r.FormValue(string(k))
 			if tf != "" {
-				pickupCompleted = append(pickupCompleted, data.PickupList[i])
-				pickupCompleted[i].Completed = true
+				jobs = append(jobs, tf)
 			}
 		}
-		errlog.Trace.Println("getback", pickupCompleted)
+		errlog.Trace.Println("getback", jobs)
+		for _, v := range jobs {
+			var job map[string]string
+			job = make(map[string]string)
+			job["pickup_id"] = v
+			job["collector_id"] = ""
+			completedJob(job)
+		}
 
 		// update backend
-		jsonValue, err := json.Marshal(pickupCompleted)
-		if err != nil {
-			errlog.Error.Println("error in marshal", err)
-			return
-		}
 
-		url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role=user"
-		client := &http.Client{}
-		request, err := http.NewRequest(http.MethodPut, url,
-			bytes.NewBuffer(jsonValue))
-		request.Header.Set("Content-Type", "application/json")
-		errlog.Trace.Printf("put REQUEST=%v\n", request)
-		response, err := client.Do(request)
-		if err != nil {
-			errlog.Error.Printf("The HTTP request failed with error %s\n", err)
-			return
-		}
-		data1, err := ioutil.ReadAll(response.Body)
-		defer response.Body.Close()
-		errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, string(data1))
-		if err != nil {
-			errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, err.Error())
-			return
-		}
 		// if string(data1) == "Update record(s)" {
 		// 	return
 		// }
@@ -134,6 +217,32 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 
 	executeTemplate(w, "user_pickup_list.gohtml", data)
 	// }
+}
+
+func completedJob(jobs map[string]string) (bool, error) {
+	errlog.Trace.Println("completedJob: ", jobs)
+
+	url := "http://localhost:5000/api/v1/pickups/" + jobs["pickup_id"] + "?key=secretkey&role=user"
+	client := &http.Client{}
+	request, err := http.NewRequest(http.MethodPut, url, nil)
+	request.Header.Set("Content-Type", "application/json")
+	errlog.Trace.Printf("put REQUEST=%v\n", request)
+	response, err := client.Do(request)
+	if err != nil {
+		errlog.Error.Printf("The HTTP request failed with error %s\n", err)
+		return false, err
+	}
+	data1, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
+	errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, string(data1))
+	if err != nil {
+		errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, err.Error())
+		return false, err
+	}
+	if string(data1) == "Update record(s)" {
+		return true, nil
+	}
+	return false, errors.New(string(data1))
 }
 
 func requestPickup(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +261,6 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 	}
 	data.UserName = sess.userName
 
-	executeTemplate(w, "user_requested_form.gohtml", data)
 	if r.Method == http.MethodPost {
 
 		var newOrder pickup
@@ -205,11 +313,13 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 		errlog.Trace.Println("response.Header=", response.Header)
 		errlog.Trace.Println("response.Body=", string(data1))
 		if string(data1) == "inserted" {
-			data.MsgToUser = "The new pickup request has been successfully posted!"
+			http.Redirect(w, r, "/welcome", http.StatusSeeOther)
+		} else {
+			data.MsgToUser = "We are sorry that your request has not been accepted!"
 			fmt.Fprintf(w, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", data.MsgToUser)
 		}
-		http.Redirect(w, r, "/welcome", http.StatusSeeOther)
 	}
+	executeTemplate(w, "user_requested_form.gohtml", data)
 }
 
 func getCoordinate(postCode string) (lat float64, lng float64) {

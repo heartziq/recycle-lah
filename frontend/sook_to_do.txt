@@ -1,1 +1,0 @@
-1.  mapSessions should store session expiry date instead of in mapUsers

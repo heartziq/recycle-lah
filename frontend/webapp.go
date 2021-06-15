@@ -89,9 +89,14 @@ func setupHandles() {
 	// reward points
 	http.HandleFunc("/view_points", httpLog(checkAccess(viewPoints)))
 	// pickups
-	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
 	http.HandleFunc("/request_pickup", httpLog(requestPickup))
+	http.HandleFunc("/user_pickup_list", httpLog(checkAccess(userPickupList)))
+	http.HandleFunc("/view_Completed_Jobs", httpLog(checkAccess(viewCompletedJobs)))
 	// http.HandleFunc("/req_pickup", httpLog(checkAccess(requestPickup)))
+
+	//collector
+	http.HandleFunc("/view_available_jobs", httpLog(showJobsAvailable))
+	http.HandleFunc("/view_my_jobs", httpLog(showMyJobs))
 
 	// recycle Bin
 	http.HandleFunc("/indexBin", IndexBin)
@@ -102,11 +107,11 @@ func setupHandles() {
 	http.HandleFunc("/showrecyclebins", showRecycleBins)
 
 	// Sook for testing only
-	http.HandleFunc("/index_sook", httpLog(indexSook))
-	http.HandleFunc("/dummyDeleteTask", httpLog(dummyCalldeletePickup))
-	http.HandleFunc("/dummyShowAllAvailJobsforCollector", httpLog(dummyCallCollectorShowJobsAvailable))
-	http.HandleFunc("/dummyAcceptJob", httpLog(dummyCalldummyacceptJob))
-	http.HandleFunc("/dummyViewAssignedJob", httpLog(dummyViewAttendingJob))
+	// http.HandleFunc("/index_sook", httpLog(indexSook))
+	// http.HandleFunc("/dummyDeleteTask", httpLog(dummyCalldeletePickup))
+	// http.HandleFunc("/dummyShowAllAvailJobsforCollector", httpLog(dummyCallCollectorShowJobsAvailable))
+	// http.HandleFunc("/dummyAcceptJob", httpLog(dummyCalldummyacceptJob))
+	// http.HandleFunc("/dummyViewAssignedJob", httpLog(dummyViewAttendingJob))
 
 	// http.HandleFunc("/menu", mainMenu)
 
