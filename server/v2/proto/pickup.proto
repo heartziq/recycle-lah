@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pickupv2;
+
+option go_package = "./pickupv2";
+
+// import "google/api/http.proto";
+import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
+import "google/protobuf/empty.proto";
+
+// The greeting service definition
+service Pickups {
+
+
+  // Server streaming rpc
+  rpc ListPickups(google.protobuf.Empty) returns (stream google.api.HttpBody) {
+    option (google.api.http) = {
+      get: "/api/v2/pickups"
+    };
+  }
+
+}
