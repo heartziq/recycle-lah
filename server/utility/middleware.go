@@ -50,7 +50,8 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 			if token := mechanism[1]; token != "" {
 
 				// validate token
-				if _, err := VerifyToken(token); err != nil {
+				userid, err := VerifyToken(token)
+				if err != nil {
 					log.Printf("Validate token err: %v\n", err.Error())
 					if err.Error() == "token expired" {
 						http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
@@ -62,7 +63,7 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 					return
 
 				}
-
+				log.Printf("userid: %v", userid)
 				next.ServeHTTP(w, r)
 				return
 
@@ -72,6 +73,5 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("401 - Status Unauthorized"))
-
 	})
 }
