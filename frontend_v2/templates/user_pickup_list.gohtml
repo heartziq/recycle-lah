@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+{{ template "header" .}}
+
+<body>
+    {{template "BodyTitle" .}}
+    {{ template "prinavbar" . }}
+    <br>
+    <h3>My Pickup Requests</h3>
+    <br>
+
+    <!-- <label for="PickupList" required>Select View Slot By: </label>
+    <select id="PickupList" class="InApplication" type=" text" name="PickupList" placeholder="PickupList"><br><br>
+        <option value="1">None Completion</option>
+        <option value="2">Delete Request</option>
+        <option value="3">History</option>
+        <option value="4">All</option>
+    </select><br> -->
+
+    <div class="CSSPickups">
+        <form method="post">
+            <table>
+                <tr>
+                    <th>Id</th>
+                    <th>Lat</th>
+                    <th>Lng</th>
+                    <th>Address</th>
+                    <th>CreatedBy</th>
+                    <th>Collector</th>
+                    <th>Completed</th>
+                </tr>
+
+                {{ range $k, $v := .PickupList }}
+                <tr>
+                    <td>
+                        {{ $v.Id}}
+                    </td>
+                    <td>
+                        {{ $v.Lat }}
+                    </td>
+                    <td>
+                        {{ $v.Lng }}
+                    </td>
+                    <td>
+                        {{ $v.Address }}
+                    </td>
+                    <td>
+                        {{ $v.CreatedBy }}
+                    </td>
+                    <td>
+                        {{ $v.Collector }}
+                    </td>
+                    <td>
+                        <input type="checkbox" id="{{ $k }}" name="{{ $k }}" value="{{ $k }}">
+                    </td>
+                </tr>
+                {{ end }}
+            </table>
+            <input class="Application" style="float: right; margin-right: 20pt;" type="submit">
+        </form>
+    </div>
+    <br />
+
+    <!--
+Another way 2
+{{ range $key, $value := . }}
+<h3> {{ $key }}</h3>
+<p>{{ $value }}</p>
+{{ end }}
+<br />
+Another Way 3
+{{ range . }} {{ . }} <br /> {{ end }}
+<br />
+Another way 4
+{{ range . }}
+
+{{ if .FamilyName }}
+   FamilyName: {{ .FamilyName}}
+{{ end }}
+<br />
+{{ end }}
+Another way 5
+-->
+</body>
+
+</html>

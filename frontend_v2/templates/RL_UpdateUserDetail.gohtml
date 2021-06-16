@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+
+{{ template "header" .}}
+
+<body>
+    {{template "BodyTitle" .}}
+    {{ if eq .Collector "Y" }}
+    {{ template "col_prinavbar" . }}
+    {{ else }}
+    {{ template "prinavbar" . }}
+    {{ end }}
+    <br>
+    <form method="post">
+        <h3 class="Application">Please enter new detail below!</h3>
+        <div class=" Application">
+            <div>
+                <input class="InApplication" type="text" name="newusername" placeholder="New User Name">
+                <input class="InApplication" type="password" name="newpassword" placeholder="New Password">
+                <input class="InApplication" type="password" name="confirmpassword" placeholder="Confirm New Password">
+            </div>
+            <input class="Application" type="submit">
+        </div>
+    </form>
+    <h4 class="Application" id="MsgToUser"></h4>
+</body>
+
+</html>

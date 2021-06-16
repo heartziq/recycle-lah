@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+
+{{ template "header" .}}
+
+<body>
+
+  {{template "BodyTitle" .}}
+  <br>
+  <h3 class="Application">Please log in with user id and password!</h3>
+  <div class="Application">
+    <form method="post">
+      <!-- <br>
+      <label for="userid" class="label">User Id </label>
+      <br /> -->
+      <div style="padding-bottom: 19px;">
+        <div class="InApplication">
+          <input class="InApplication" type="text" name="userid" placeholder="userid" required>
+        </div>
+        <!-- <br>
+      <label for="password" class="label">Password </label>
+      <br /> -->
+        <div class="InApplication">
+          <input class="InApplication" type="text" name="password" placeholder="password" required>
+        </div>
+
+      </div>
+      <input class="Application" type="submit">
+      <b><a href="/newuser">New User</a></b>
+    </form>
+  </div>
+
+  {{ range $key, $value := .Dt }}
+  {{ if eq $key "Message" }}
+  <h4 class="Application"> {{ $value }}</h4>
+  {{ end }}
+  {{ end }}
+
+  {{ range $key, $value := .Dt }}
+  {{ if eq $key "Error" }}
+  <h4 class="Application"> {{ $value }}</h4>
+  {{ end }}
+  {{ end }}
+
+
+
+  <!--
+<a class="lead pull-right" href="/newuser">Create new Account</a>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    -->
+
+</body>
+
+</html>

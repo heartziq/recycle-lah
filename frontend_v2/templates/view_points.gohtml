@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" .}}
+
+<body>
+  {{template "BodyTitle" .}}
+  {{ template "prinavbar" . }}
+  <br>
+  <br>
+  <br>
+  <div class="container">
+    <h1>My Reward Points<h1>
+        <br />
+        {{ if .Token }}
+        Token = {{ .Token }}
+        {{ end }}
+        <br />
+        Your have accumulated {{ .RewardPoints }} reward points.
+        <br />
+  </div>
+</body>
+
+</html>

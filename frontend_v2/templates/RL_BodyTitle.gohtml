@@ -1,0 +1,69 @@
+{{define "BodyTitle"}}
+<div class="MainBar">
+  <nav>
+    <div style="float:left; width:50%">
+      <div style="overflow: hidden; max-height: 37px;">
+        <div style="display: inline-block;">
+          <u>
+            <h1 style="margin-left: 5px">
+              <a class="MainBar" href="/">Recycle Lah! &nbsp&nbsp{{.PageName}}</a>
+            </h1>
+          </u>
+        </div>
+        </h1>
+      </div>
+    </div>
+    <div style=" position: absolute; bottom: 2px;right:5px; width:50%;">
+      <div style="display: flex; flex-direction: row-reverse">
+        {{if eq .PageName "Log Out"}}
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 5px">
+            <a style="text-decoration: none" href="/signin"> Log In</a>
+          </h3>
+        </div>
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 20px">See You Again!</h3>
+        </div>
+        {{else}}
+
+        {{if eq .PageName "New User Registration"}}
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 5px">
+            <a style="text-decoration: none" href="/signin"> Log In</a>
+          </h3>
+        </div>
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 20px">Hello!</h3>
+        </div>
+        {{else}}
+
+        {{if eq .UserName ""}}
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 5px">
+            <a style="text-decoration: none" href="/signin"> Log In</a>
+          </h3>
+        </div>
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 20px">Hello!</h3>
+        </div>
+
+        {{else}}
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 5px">
+            <a style="text-decoration: none" href="/logout"> Log Out</a>
+          </h3>
+        </div>
+        <div style="display: inline-block; overflow: hidden; max-height: 66px;">
+          <h3 style="margin: 0px 20px">Hello {{.UserName}}</h3>
+        </div>
+
+        {{ end }}
+
+        {{ end }}
+
+        {{ end }}
+      </div>
+    </div>
+  </nav>
+</div>
+{{ end }}

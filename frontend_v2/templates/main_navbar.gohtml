@@ -1,0 +1,17 @@
+{{ define "mainnavbar" }}
+<div class="container">
+  <nav>
+    <div style=" float:left ;width:fit-content;">
+      <h4>
+        {{ if ne . "" }}
+        <a href="/welcome" class="navpadding">Menu</a> |
+        {{end}}
+        <a href="/newuser" class="navpadding">Create An Account</a> |
+        <a href="/showrecyclebins" class="navpadding">Recycle Bin List</a>
+        &nbsp;&nbsp;
+      </h4>
+    </div>
+  </nav>
+</div>
+<br>
+{{ end }}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+{{ template "header" .}}
+
+<body>
+  <style>
+    table,
+    th,
+    td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 5px;
+    }
+
+    th {
+      text-align: left;
+    }
+
+    img {
+      width: 20%;
+      width: 20%;
+    }
+  </style>
+
+  {{template "BodyTitle" .}}
+  {{ if eq .Collector "Y" }}
+  {{ template "col_prinavbar" . }}
+  {{ else }}
+  {{ template "prinavbar" . }}
+  {{ end }}<br>
+
+
+  <h3>Show Users Feedback.</h3><br>
+  <div class="RecycleBin">
+    <p>Select your items and fill in the require fields.</p>
+    <table style="width:65%">
+      <tr>
+        <th>User ID</th>
+        <th>Bin Address</th>
+        <th>Postcode</th>
+        <th>Feedback</th>
+        <th>Bin Fullness</th>
+        <th>Remarks</th>
+        <th>Status</th>
+      </tr>
+
+      {{ range $v := .FeedBacks }}
+      <tr>
+        <th>{{$v.UserID }}</th>
+        <th>{{$v.BinAddress }}</th>
+        <th>{{$v.Postcode }}</th>
+        <th>{{$v.FBoptions }}</th>
+        <th>{{$v.ColorCode }}</th>
+        <th>{{$v.Remarks }}</th>
+        <th>{{$v.BinStatusUpdate }}</th>
+      </tr>
+      {{ end }}
+    </table>
+  </div><br>
+  <!-- <a href="/">Hope Page</a> -->
+
+</body>
+
+</html>

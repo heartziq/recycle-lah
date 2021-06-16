@@ -1,0 +1,232 @@
+/* {{define "StyleCSS"}}
+<style> */
+
+/* sookyoon */
+h1 {
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* color: mediumblue; */
+}
+h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  color: lightskyblue;
+}
+h3 {
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* color: midnightblue; */
+}
+
+.container {
+  margin-left: 1%;
+}
+.navpadding {
+  padding: 5px;
+}
+.input {
+  width: 500px;
+  height: 25px;
+  padding-bottom: 10px;
+}
+.label {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+.submit {
+  width: 500px;
+  height: 25px;
+}
+
+/* sinyawcss */
+body {
+  margin: 0;
+  align-items: center;
+}
+
+a,
+img,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0px;
+  padding: 0px;
+}
+
+body > h3 {
+  margin-left: 1.5%;
+}
+
+a {
+  color: #2541b2;
+  text-decoration: none;
+}
+
+/* main page table */
+table.tablestyle {
+  width: 40%;
+}
+.tablestyle td {
+  width: 50%;
+}
+
+/* standand header every page */
+.MainBar {
+  color: #eaf6f6;
+  background-color: #66bfbf;
+  width: 100%;
+  height: 42px;
+  position: relative;
+  vertical-align: bottom;
+}
+
+.MainBar h1,
+a.MainBar {
+  color: #eaf6f6;
+  font-size: 34px;
+}
+
+/* standand footer every page */
+div.footer {
+  color: #eaf6f6;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+.footer div > h4 {
+  color: 66bfbf;
+}
+.footer table {
+  background-color: #66bfbf;
+  table-layout: fixed;
+  width: 100%;
+  text-align: center;
+}
+
+/* mainpage */
+div.mdisplay {
+  border-color: #66bfbf;
+  border-style: solid;
+  border-width: 1px;
+  height: 450px;
+  overflow: hidden;
+}
+
+/* bookcar car picture layout */
+div.display {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+  height: fit-content;
+}
+
+.display > div {
+  margin: 5px;
+  border: 1px solid #66bfbf;
+  width: 180px;
+  overflow: hidden;
+  border-radius: 10%;
+}
+
+.display > div:hover,
+div.mdisplay:hover {
+  background-color: #66bfbf;
+  color: #eaf6f6;
+}
+
+div.display img {
+  width: 100%;
+  height: auto;
+}
+
+.displayText {
+  width: 100%;
+  text-align: center;
+  padding: 0px;
+  margin: 0px;
+}
+
+/* data input page */
+h3.Application,
+h4.Application {
+  width: fit-content;
+  margin: 0% auto;
+  margin-top: 5%;
+}
+div.Application {
+  width: 200pt;
+  margin: 0% auto;
+  margin-top: 20pt;
+  margin-bottom: 2;
+}
+input.Application,
+div.Application > input {
+  background-color: #eaf6f6;
+  border-color: #66bfbf;
+  color: #66bfbf;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-left: 5%;
+}
+input.Application:hover,
+div.Application > input:hover {
+  background-color: #66bfbf;
+  border-color: #eaf6f6;
+  color: #eaf6f6;
+  font-weight: bold;
+}
+
+textarea.InApplication,
+select.InApplication,
+input.InApplication {
+  border-inline-color: none;
+  border-style: solid;
+  border-color: #66bfbf;
+  border-width: 1.5px;
+  background-color: transparent;
+  width: 200pt;
+  height: 100%;
+}
+textarea.InApplication,
+select.InApplication:focus,
+input.InApplication:focus {
+  outline: none;
+  background: transparent;
+}
+
+div.CSSPickups {
+  width: 95%;
+  margin: 0 auto;
+  margin-top: 15px;
+  padding-top: 5px;
+}
+
+.CSSPickups table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.CSSPickups td {
+  padding-top: 5px;
+}
+
+.CSSPickups tr:nth-child(even) {
+  background-color: #eaf6f6;
+}
+
+div.RecycleBin {
+  width: 95%;
+  margin: 0 auto;
+  padding-top: 5px;
+}
+
+input.RecycleBin,
+select.RecycleBin {
+  width: 100%;
+}
+
+/* </style>
+{{end}} */

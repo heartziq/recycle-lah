@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+{{ template "header" .}}
+
+<body>
+    {{template "BodyTitle" .}}
+    {{ if eq .Collector "Y" }}
+    {{ template "col_prinavbar" . }}
+    {{ else }}
+    {{ template "prinavbar" . }}
+    {{ end }}<br>
+
+    <h3 class="Application" style="margin-top: 3%;">Enter the information below to Feedback</h3>
+
+    <div class="Application">
+        <form method="POST">
+
+            <label for="FBoptions">Select the Feedback options given:</label><br>
+            <select class="RecycleBin" id="FBoptions" name="FBoptions" size="4" required><br>
+                <option value="Bin Fullness Status">Update bin fullness level.</option>
+                <option value="New Bin Request">Request new bin.</option>
+                <option value="Bin with Defect">Bin defects fill in remark.</option>
+                <option value="Others with remarks">Others as fill in remark.</option>
+            </select><br><br>
+
+
+            <label for="binfull">Indicate Bin fullness:</label><br>
+            <select class="RecycleBin" id="binfull" name="binfull" size="3" required><br>
+                <option value="NIL">NA</option>
+                <option value="Green: Almost Empty">Green: Almost Empty</option>
+                <option value="Yellow: 50% Full">Yellow: 50% Full</option>
+                <option value="Orange: 80% Full">Orange: 80% Full</option>
+                <option value="Red: 100% Full">Red: 100% Full</option>
+            </select><br><br>
+
+            <label for="postcode">Postcode Location: </label><br>
+            <input class="RecycleBin" type="number" id="postcode" name="postcode" placeholder="828761" min="100000"
+                max="999999" required><br><br>
+
+            <label for="Binaddress">Bin Locatons: </label><br>
+            <input class="RecycleBin" type="text" id="Binaddress" name="Binaddress"
+                placeholder="WaterWayPt #B1-27 Starhub Shop" required><br><br>
+
+            <label for="remarks">Remarks: </label><br>
+            <input class="RecycleBin" type="text" id="remarks" name="remarks" placeholder="Badly damaged."
+                required><br><br>
+
+            <input class="Application" type="submit" name="Submit Feedback"><br>
+
+        </form>
+    </div>
+
+
+    <!-- <a href="/">Hope Page</a> -->
+
+</body>
+
+</html>
+
+<!--
+{{if .First}}
+    <h2>Welcome Back {{.First}} {{.Last}} !</h2>
+    <h2>You have to Login again to confirm you are who you are...<br>
+
+{{else}}
+
+    <h2>Or you can sign up for an account first before browsing the products.</h2>
+    <h2><a href="/signup">Sign Up NOW!</a></h2><br><br>
+
+{{end}}
+
+
+    <h2>Or you can sign up for an account first before browsing the products.</h2>
+    <h2><a href="/signup">Sign Up NOW!</a></h2><br><br>
+
+<a href="/">Back to Home Page</a>
+
+-->

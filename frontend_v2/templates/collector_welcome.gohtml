@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+{{ template "header" }}
+<body>
+  {{ template "col_prinavbar" . }}
+  <div class="container">
+    <h1>Welcome (Collector)<h1>
+    <br />
+        {{ if .Token }}
+       Token = {{ .Token }}
+    {{ end }}
+
+    <br />
+    Your have accumulated {{ .RewardPoints }}
+    <br />
+    {{ if eq .RewardPoints }}
+       found rewardpoints <br />
+    {{ else }}
+       reward point not found
+    {{ end }}
+    {{ if eq .RewardPoints 0 }}
+       rewards point is 0 
+      {{ end  }}
+  </div>
+ </body>
+</html>
