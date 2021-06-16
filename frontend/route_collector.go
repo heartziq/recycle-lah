@@ -10,9 +10,9 @@ import (
 )
 
 // ===============  collector - show all jobs available
-// curl http://localhost:5000/api/v1/pickups
+// change uri from v1 to v2
 func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
-	errlog.Trace.Println("\n\n***dummyCallCollectorShowJobsAvailable***")
+	errlog.Trace.Println("\n\n***showJobsAvailable***")
 
 	data := struct {
 		PageName   string
@@ -32,7 +32,7 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 	}
 	data.UserName = sess.userName
 
-	url := "http://localhost:5000/api/v1/pickups"
+	url := "http://localhost:5000/api/v2/pickups"
 
 	client := &http.Client{}
 	errlog.Trace.Println("url=", url)
@@ -90,7 +90,7 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 }
 
 func showMyJobs(w http.ResponseWriter, r *http.Request) {
-	errlog.Trace.Println("\n\n***dummyViewAttendingJob***")
+	errlog.Trace.Println("\n\n***showMyJobs***")
 
 	data := struct {
 		PageName   string
@@ -113,7 +113,6 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 
 	url := "http://localhost:5000/api/v1/pickups/3" + "?key=secretkey&role=collector"
 	apiReq, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
-	// bearer := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyMTIzNCIsImV4cCI6MTYyMzQ3NTMwMywiaXNzIjoidGVzdCJ9.USu2NiQ9vcWHGCeV2m1JhZ23P6r5yCL7UY-m-zeVLBg"
 	bearer := "Bearer " + sess.token
 	apiReq.Header.Add("Authorization", bearer)
 	apiReq.Header.Set("Content-Type", "application/json")
@@ -177,7 +176,7 @@ func changeJobCollector(jobs map[string]string) (bool, error) {
 	// jobs = make(map[string]string)
 	// jobs["c736eb0a-a71a-4247-83fe-dabad2702ec8"] = "testing"
 
-	errlog.Trace.Println("dummychangeJobCollector: ", jobs)
+	errlog.Trace.Println("changeJobCollector: ", jobs)
 	jsonValue, err := json.Marshal(jobs)
 	if err != nil {
 		errlog.Error.Println("error in marshal", err)
