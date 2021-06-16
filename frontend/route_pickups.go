@@ -21,8 +21,10 @@ type pickup struct {
 	Completed bool    `json:"completed"`
 }
 
+// func viewCompletedJobs() retrieves list of (assigned) jobs from the api server
+// It filters to display only completed job
 func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
-	errlog.Trace.Println("\n\n***userPickupList***")
+	errlog.Trace.Println("\n\n***viewCompletedJobs***")
 
 	data := struct {
 		PageName   string
@@ -40,6 +42,8 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 		message(w, r)
 		return
 	}
+
+	// send request to api server
 	url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role="
 	if sess.isCollector {
 		url = url + "collector"
@@ -56,9 +60,6 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("bearer=", bearer)
 	response, err := client.Do(apiReq)
 
-	// client := &http.Client{}
-	// errlog.Trace.Println("url=", url)
-	// response, err := client.Get(url)
 	if err != nil {
 		errlog.Error.Println("client.Get")
 		setFlashCookie(w, "Applicatin error (500)")
@@ -67,9 +68,11 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.UserName = sess.userName
+
+	// process response body
 	data1, err := ioutil.ReadAll(response.Body)
 
-	errlog.Trace.Println("data1=", data1)
+	errlog.Trace.Println("data1=", string(data1))
 	defer response.Body.Close()
 	if err != nil {
 		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())
@@ -78,6 +81,8 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+
+	// storing the return results into map
 	var allListitems []pickup
 	var mapPickup = map[string]pickup{}
 	json.Unmarshal(data1, &allListitems)
@@ -92,6 +97,7 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		var jobs []string
+		// stores user selected item into map
 		for k, v := range mapPickup {
 			errlog.Trace.Printf("key, value: %v, %v", k, v)
 			tf := r.FormValue(string(k))
@@ -100,6 +106,9 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		errlog.Trace.Println("getback", jobs)
+
+		// for each job in the map, calls completedJob() to send request to the api server
+
 		for _, v := range jobs {
 			var job map[string]string
 			job = make(map[string]string)
@@ -108,11 +117,6 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 			completedJob(job)
 		}
 
-		// update backend
-
-		// if string(data1) == "Update record(s)" {
-		// 	return
-		// }
 		http.Redirect(w, r, "/welcome", http.StatusSeeOther)
 	}
 
@@ -120,6 +124,10 @@ func viewCompletedJobs(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+// func userPickupList() shows list of jobs that have been assigned
+// It allows user to select multipile job and indicate as completed
+// It then calls completedJob() repeated to fulfill the request
+// This could be implemented in Go Routine
 func userPickupList(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("\n\n***userPickupList***")
 
@@ -146,6 +154,7 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		url = url + "user"
 	}
 
+	// send request to api server
 	apiReq, err := http.NewRequest("GET", url, nil)
 
 	bearer := "Bearer " + sess.token
@@ -155,9 +164,6 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("bearer=", bearer)
 	response, err := client.Do(apiReq)
 
-	// client := &http.Client{}
-	// errlog.Trace.Println("url=", url)
-	// response, err := client.Get(url)
 	if err != nil {
 		errlog.Error.Println("client.Get")
 		setFlashCookie(w, "Applicatin error (500)")
@@ -166,9 +172,11 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.UserName = sess.userName
+
+	// get response body and process the body
 	data1, err := ioutil.ReadAll(response.Body)
 
-	errlog.Trace.Println("data1=", data1)
+	errlog.Trace.Println("data1=", string(data1))
 	defer response.Body.Close()
 	if err != nil {
 		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())
@@ -177,6 +185,8 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
+
+	// storing the return results into map
 	var allListitems []pickup
 	var mapPickup = map[string]pickup{}
 	json.Unmarshal(data1, &allListitems)
@@ -190,6 +200,7 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
 
 	if r.Method == http.MethodPost {
+		// stores user selected item into map
 		var jobs []string
 		for k, v := range mapPickup {
 			errlog.Trace.Printf("key, value: %v, %v", k, v)
@@ -199,6 +210,8 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		errlog.Trace.Println("getback", jobs)
+
+		// for each job in the map, calls completedJob() to send request to the api server
 		for _, v := range jobs {
 			var job map[string]string
 			job = make(map[string]string)
@@ -207,21 +220,18 @@ func userPickupList(w http.ResponseWriter, r *http.Request) {
 			completedJob(job)
 		}
 
-		// update backend
-
-		// if string(data1) == "Update record(s)" {
-		// 	return
-		// }
 		http.Redirect(w, r, "/welcome", http.StatusSeeOther)
 	}
 
 	executeTemplate(w, "user_pickup_list.gohtml", data)
-	// }
+
 }
 
+// func completedJob() send request to api server to approve the job completion
 func completedJob(jobs map[string]string) (bool, error) {
 	errlog.Trace.Println("completedJob: ", jobs)
 
+	// send request to api server
 	url := "http://localhost:5000/api/v1/pickups/" + jobs["pickup_id"] + "?key=secretkey&role=user"
 	client := &http.Client{}
 	request, err := http.NewRequest(http.MethodPut, url, nil)
@@ -232,6 +242,8 @@ func completedJob(jobs map[string]string) (bool, error) {
 		errlog.Error.Printf("The HTTP request failed with error %s\n", err)
 		return false, err
 	}
+
+	// process the response
 	data1, err := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
 	errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, string(data1))
@@ -239,12 +251,19 @@ func completedJob(jobs map[string]string) (bool, error) {
 		errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, err.Error())
 		return false, err
 	}
+	// interpret results, could have used status code
 	if string(data1) == "Update record(s)" {
 		return true, nil
 	}
 	return false, errors.New(string(data1))
 }
 
+// func requestPickup() gets input from user and send request to api server to submit the request
+// The template is designed based on api Version 2 of the api server and
+// some of the input fiels are not relevant for api Version 1
+// As version 2 was not ready for the time of integration, the new fields would not be sent to the client
+// For current version, we are not ready to integrate with google map api.
+// It calls func getCoordinate() that returns some dummy latitude and longitude.
 func requestPickup(w http.ResponseWriter, r *http.Request) {
 	errlog.Trace.Println("\n\n***requestPickup***")
 	data := struct {
@@ -264,13 +283,6 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 
 		var newOrder pickup
-		// //  get data from form
-		// dt := time.Now()
-		// hr, mi, se := dt.Clock()
-		// y, m, d := dt.Date()
-		// ID := int(y) + int(m) + d + hr + mi + se
-		// newOrder.Id = sess.userId + "pickup_" + strconv.Itoa(ID)
-		// errlog.Error.Println("data: ", data)
 
 		newOrder.CreatedBy = sess.userId
 		description := r.FormValue("description")
@@ -285,6 +297,7 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 		newOrder.Lng = lng
 		errlog.Trace.Println("Html Form :", newOrder, description, weight_range)
 
+		// send request to api server
 		url := "http://localhost:5000/api/v1/pickups/4" + "?key=secretkey&role="
 		if sess.isCollector {
 			url = url + "collector"
@@ -307,6 +320,8 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 			message(w, r)
 			return
 		}
+
+		// process response
 		data1, _ := ioutil.ReadAll(response.Body)
 		defer response.Body.Close()
 		errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
@@ -322,6 +337,7 @@ func requestPickup(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, "user_requested_form.gohtml", data)
 }
 
+// func getCoordinate() returns some dummy values based on the post code entered
 func getCoordinate(postCode string) (lat float64, lng float64) {
 	if postCode == "" {
 		return 1.33221, 103.77466 //  599489 Ngee Ann Poly

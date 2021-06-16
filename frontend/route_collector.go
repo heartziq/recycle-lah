@@ -9,10 +9,12 @@ import (
 	"net/http"
 )
 
-// ===============  collector - show all jobs available
-// curl http://localhost:5000/api/v1/pickups
+// func showJobsAvailable) calls function to retrieve list of available jobs from api server
+// It allows user to accept multiple jobs
+// It then call func changeJobCollector repeating to accept job
+// This could be implemented in go routine
 func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
-	errlog.Trace.Println("\n\n***dummyCallCollectorShowJobsAvailable***")
+	errlog.Trace.Println("\n\n***showJobsAvailable***")
 
 	data := struct {
 		PageName   string
@@ -32,6 +34,7 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 	}
 	data.UserName = sess.userName
 
+	// sending request to api server
 	url := "http://localhost:5000/api/v1/pickups"
 
 	client := &http.Client{}
@@ -44,8 +47,9 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get response body and process the body
 	data1, err := ioutil.ReadAll(response.Body)
-	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, data.PickupList)
+	errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
 	defer response.Body.Close()
 	if err != nil {
 		errlog.Error.Printf("ReadAll: response status code:%+v err:%s\n", response.StatusCode, err.Error())
@@ -54,6 +58,7 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// storing the return results into map
 	var allListitems []pickup
 	var mapPickup = map[string]pickup{}
 	json.Unmarshal(data1, &allListitems)
@@ -66,6 +71,8 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		var jobs []string
+
+		// stores user selected item into map
 		for k, v := range mapPickup {
 			errlog.Trace.Printf("key, value: %v, %v", k, v)
 			tf := r.FormValue(string(k))
@@ -74,6 +81,8 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		errlog.Trace.Println("getback", jobs)
+
+		// for each job in the map, calls changeJobCollector() to send request to the api server
 		for _, v := range jobs {
 			var job map[string]string
 			job = make(map[string]string)
@@ -83,14 +92,17 @@ func showJobsAvailable(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/welcome", http.StatusSeeOther)
 	}
-	// errlog.Trace.Printf("response status code:%+v\nstring(data1):%+v\n", response.StatusCode, string(data1))
 
 	executeTemplate(w, "collector_pickup_jobs.gohtml", data)
-	// }
+
 }
 
+// func showMyJobs() calls function to retrieve collector's job
+// It allows user to select multiple jobs for cancellation
+// It then call func changeJobCollector repeating to cancel job
+// This could be implemented in go routine
 func showMyJobs(w http.ResponseWriter, r *http.Request) {
-	errlog.Trace.Println("\n\n***dummyViewAttendingJob***")
+	errlog.Trace.Println("\n\n***showMyJobs***")
 
 	data := struct {
 		PageName   string
@@ -111,9 +123,10 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 
 	data.UserName = sess.userName
 
+	// sending request to api server
+
 	url := "http://localhost:5000/api/v1/pickups/3" + "?key=secretkey&role=collector"
 	apiReq, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
-	// bearer := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyMTIzNCIsImV4cCI6MTYyMzQ3NTMwMywiaXNzIjoidGVzdCJ9.USu2NiQ9vcWHGCeV2m1JhZ23P6r5yCL7UY-m-zeVLBg"
 	bearer := "Bearer " + sess.token
 	apiReq.Header.Add("Authorization", bearer)
 	apiReq.Header.Set("Content-Type", "application/json")
@@ -128,6 +141,7 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get response body and process the body
 	data1, err := ioutil.ReadAll(response.Body)
 
 	defer response.Body.Close()
@@ -139,6 +153,7 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// storing the return results into map
 	var allListitems []pickup
 	var mapPickup = map[string]pickup{}
 	json.Unmarshal(data1, &allListitems)
@@ -151,6 +166,8 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		var jobs []string
+		// stores user selected item into map
+
 		for k, v := range mapPickup {
 			errlog.Trace.Printf("key, value: %v, %v", k, v)
 			tf := r.FormValue(string(k))
@@ -159,6 +176,8 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		errlog.Trace.Println("getback", jobs)
+
+		// for each job in the map, calls changeJobCollector() to send request to the api server
 		for _, v := range jobs {
 			var job map[string]string
 			job = make(map[string]string)
@@ -172,18 +191,17 @@ func showMyJobs(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, "collector_jobs.gohtml", data)
 }
 
+// func changeJobCollector() send request to api server to cancel/accept job
 func changeJobCollector(jobs map[string]string) (bool, error) {
-	// var jobs map[string]string
-	// jobs = make(map[string]string)
-	// jobs["c736eb0a-a71a-4247-83fe-dabad2702ec8"] = "testing"
 
-	errlog.Trace.Println("dummychangeJobCollector: ", jobs)
+	errlog.Trace.Println("changeJobCollector: ", jobs)
 	jsonValue, err := json.Marshal(jobs)
 	if err != nil {
 		errlog.Error.Println("error in marshal", err)
 		return false, err
 	}
 
+	// send request to api server
 	url := "http://localhost:5000/api/v1/pickups/5" + "?key=secretkey&role=collector"
 	client := &http.Client{}
 	request, err := http.NewRequest(http.MethodPut, url,
@@ -195,6 +213,8 @@ func changeJobCollector(jobs map[string]string) (bool, error) {
 		errlog.Error.Printf("The HTTP request failed with error %s\n", err)
 		return false, err
 	}
+
+	// process request body
 	data1, err := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
 	errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, string(data1))
@@ -202,6 +222,7 @@ func changeJobCollector(jobs map[string]string) (bool, error) {
 		errlog.Error.Printf("response status code:%+v err:%s\n", response.StatusCode, err.Error())
 		return false, err
 	}
+	// interpret returned results, could check for status code
 	if string(data1) == "Update record(s)" {
 		return true, nil
 	}
