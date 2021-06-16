@@ -1,11 +1,9 @@
 <!doctype html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <title>RECYCLE LAH! Show RecycleBins details page</title>
+{{ template "header" .}}
 
-<body style="background-color:skyblue;">
+<body>
   <style>
     table,
     th,
@@ -29,47 +27,44 @@
     }
   </style>
 
-  </head>
 
-  <body>
-    <h1 style="color:blue;"><Strong>RECYCLE LAH! Safe the planet before its too late. </Strong></h1>
-    <h3 style="color:blue;">The earth is dying... Recycling and renewables are the answer to this! </p>
-      <h3 style="color:blue;">Thus, "Recycle Lah!" is born..</p><br><br>
+  {{template "BodyTitle" .}}
+  {{template "mainnavbar" .UserName}}
+  <br>
 
 
-        <h2 style="color:green;"><Strong>Showing all Bins details and availibility.</Strong></h2>
-        <p>Select your items and fill in the require fields.</p>
+  <h3>Showing all Bins details and availibility.</h3><br>
+  <div class="RecycleBin">
+    <p>Select your items and fill in the require fields.</p>
+
+    <table style="width:65%">
+      <tr>
+        <th>Bin ID</th>
+        <th>Bin Type</th>
+        <th>Bin Latitude</th>
+        <th>Bin Longitude</th>
+        <th>Bin Address</th>
+        <th>Postcode</th>
+        <th>Bin Fullness</th>
+      </tr>
+
+      {{ range $v:= .Bins }}
+      <tr>
+        <th>{{$v.BinID}}</th>
+        <th>{{$v.BinType }}</th>
+        <th>{{$v.BinLocationLat }}</th>
+        <th>{{$v.BinLocationLong }}</th>
+        <th>{{$v.BinAddress }}</th>
+        <th>{{$v.Postcode }}</th>
+        <th>{{$v.ColorCode }}</th>
+      </tr>
+      {{ end }}
+    </table>
+  </div><br>
 
 
-        <table style="width:65%">
-          <tr>
-            <th>Bin ID</th>
-            <th>Bin Type</th>
-            <th>Bin Latitude</th>
-            <th>Bin Longitude</th>
-            <th>Bin Address</th>
-            <th>Postcode</th>
-            <th>Bin Fullness</th>
-          </tr>
+  <!-- <a href="/">Hope Page</a> -->
 
-          {{ range . }}
-          <tr>
-            <th>{{.BinID}}</th>
-            <th>{{.BinType }}</th>
-            <th>{{.BinLocationLat }}</th>
-            <th>{{.BinLocationLong }}</th>
-            <th>{{.BinAddress }}</th>
-            <th>{{.Postcode }}</th>
-            <th>{{.ColorCode }}</th>
-          </tr>
-          {{ end }}
-        </table><br>
-
-
-
-
-        <a href="/indexBin">Back to RecycleLah Index Page</a>
-
-  </body>
+</body>
 
 </html>

@@ -1,11 +1,9 @@
 <!doctype html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <title>RECYCLE LAH! Show User Feedback page</title>
+{{ template "header" .}}
 
-<body style="background-color:skyblue;">
+<body>
   <style>
     table,
     th,
@@ -29,47 +27,43 @@
     }
   </style>
 
-  </head>
-
-  <body>
-    <h1 style="color:blue;"><Strong>RECYCLE LAH! Safe the planet before its too late. </Strong></h1>
-    <h3 style="color:blue;">The earth is dying... Recycling and renewables are the answer to this! </p>
-      <h3 style="color:blue;">Thus, "Recycle Lah!" is born..</p><br><br>
-
-
-        <h2 style="color:green;"><Strong>Show Users Feedback.</Strong></h2>
-        <p>Select your items and fill in the require fields.</p>
+  {{template "BodyTitle" .}}
+  {{ if eq .Collector "Y" }}
+  {{ template "col_prinavbar" . }}
+  {{ else }}
+  {{ template "prinavbar" . }}
+  {{ end }}<br>
 
 
-        <table style="width:65%">
-          <tr>
-            <th>User ID</th>
-            <th>Bin Address</th>
-            <th>Postcode</th>
-            <th>Feedback</th>
-            <th>Bin Fullness</th>
-            <th>Remarks</th>
-            <th>Status</th>
-          </tr>
+  <h3>Show Users Feedback.</h3><br>
+  <div class="RecycleBin">
+    <p>Select your items and fill in the require fields.</p>
+    <table style="width:65%">
+      <tr>
+        <th>User ID</th>
+        <th>Bin Address</th>
+        <th>Postcode</th>
+        <th>Feedback</th>
+        <th>Bin Fullness</th>
+        <th>Remarks</th>
+        <th>Status</th>
+      </tr>
 
-          {{ range . }}
-          <tr>
-            <th>{{.UserID }}</th>
-            <th>{{.BinAddress }}</th>
-            <th>{{.Postcode }}</th>
-            <th>{{.FBoptions }}</th>
-            <th>{{.ColorCode }}</th>
-            <th>{{.Remarks }}</th>
-            <th>{{.BinStatusUpdate }}</th>
-          </tr>
-          {{ end }}
-        </table><br>
+      {{ range $v := .FeedBacks }}
+      <tr>
+        <th>{{$v.UserID }}</th>
+        <th>{{$v.BinAddress }}</th>
+        <th>{{$v.Postcode }}</th>
+        <th>{{$v.FBoptions }}</th>
+        <th>{{$v.ColorCode }}</th>
+        <th>{{$v.Remarks }}</th>
+        <th>{{$v.BinStatusUpdate }}</th>
+      </tr>
+      {{ end }}
+    </table>
+  </div><br>
+  <!-- <a href="/">Hope Page</a> -->
 
-
-
-
-        <a href="/indexBin">Back to RecycleLah Index Page</a>
-
-  </body>
+</body>
 
 </html>

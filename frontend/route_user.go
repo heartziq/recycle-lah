@@ -365,7 +365,7 @@ func newUser(res http.ResponseWriter, req *http.Request) {
 
 		// perform input validation
 		if err := checkInputUserName(userId); err != nil {
-			Data.MsgToUser = "Please enter correct format for user id!"
+			Data.MsgToUser = "Please enter the correct User Id! It should have at least 8 characters and end with a number!"
 			fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			return
 		}
@@ -463,32 +463,25 @@ func userDetailUpdate(res http.ResponseWriter, req *http.Request) {
 
 	if req.Method == http.MethodPost {
 		//get user name and current password
-		userId := req.FormValue("userid")
+		// userId := req.FormValue("userid")
 		//get user new password and confirm the new password
 		newusername := req.FormValue("newusername")
 		newpassword := req.FormValue("newpassword")
 		confirmpassword := req.FormValue("confirmpassword")
 
-		errlog.Trace.Println("Ken In Value=", userId, newusername, newpassword, confirmpassword)
+		errlog.Trace.Println("Ken In Value=", newusername, newpassword, confirmpassword)
 
-		if userId != user.userId {
-			Data.MsgToUser = "Please log in before do updated detail!"
-			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
-			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
-		} else if newpassword != confirmpassword {
+		if newpassword != confirmpassword {
 			Data.MsgToUser = "New password and confrim password is not same!"
 			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 			// http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
-		} else if userId == "" {
-			Data.MsgToUser = "Please insert user id and password for verification!"
-			defer fmt.Fprintf(res, "<br><script>document.getElementById('MsgToUser').innerHTML = '%v';</script>", Data.MsgToUser)
 		} else {
 			//start update DB
 			var dataUpdate NewUser
 			dataUpdate.UserName = newusername
 			dataUpdate.Password = newpassword
 
-			id := userId
+			id := user.userId
 			// log.Println(email, password, newpassword, confirmpassword, newusername)
 			changeUser(dataUpdate, id)
 			// SOOKMODIFIED mapUsers[email] = user{newusername, mapUsers[email].Key}

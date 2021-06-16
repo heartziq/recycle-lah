@@ -82,8 +82,8 @@ func confirmPassword(password1 string, password2 string) bool {
 
 // simulates cleanUp process
 func cleanUp() {
-	errlog.Info.Println("    Start cleaning up")
-	errlog.Info.Println("    Cleanup complete.")
+	errlog.Info.Println("    start cleaning up, closing database")
+	errlog.Info.Println("    database closed.  Cleanup complete.")
 }
 
 // func printConfig() prints the configuration details.

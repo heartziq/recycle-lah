@@ -305,6 +305,7 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("inserted"))
 		case "PUT": // Approve a pickup
+			errlog.Trace.Println(pickup_id)
 			p.approvePickup(pickup_id)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("approve successful!"))

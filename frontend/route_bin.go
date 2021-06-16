@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"frontend/errlog"
 	"io/ioutil"
 	"net/http"
 )
@@ -34,7 +35,32 @@ func IndexBin(res http.ResponseWriter, req *http.Request) {
 
 // Get and send user feedback.
 func recycleBinFB(res http.ResponseWriter, req *http.Request) {
+
+	Data := struct {
+		PageName  string
+		UserName  string
+		Collector string
+	}{PageName: "Post Feedback"}
+
+	user, err := getSession(req)
+
+	if err != nil {
+		http.Redirect(res, req, "index.gohtml", http.StatusFound)
+		return
+	}
+	Data.UserName = user.userName
+	if user.isCollector {
+		Data.Collector = "Y"
+	}
+
 	if req.Method == http.MethodPost {
+		sess, err := getSession(req)
+		errlog.Trace.Println(sess)
+		if err != nil {
+			errlog.Error.Println("error getting session")
+			return
+		}
+		userID := sess.userId
 
 		binFeedbacks := RecycleBinDetails{
 			ID:              0,
@@ -44,7 +70,8 @@ func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 			BinLocationLong: 0,
 			BinAddress:      req.FormValue("Binaddress"),
 			Postcode:        req.FormValue("postcode"),
-			UserID:          "Lanzs", //To be puck in.
+			// UserID:          "Lanzs", //To be puck in.
+			UserID:          userID, //To be puck in.
 			FBoptions:       req.FormValue("FBoptions"),
 			ColorCode:       req.FormValue("binfull"),
 			Remarks:         req.FormValue("remarks"),
@@ -74,14 +101,38 @@ func recycleBinFB(res http.ResponseWriter, req *http.Request) {
 			fmt.Println("Bin Details added :\n", string(data))
 		}
 	}
-	tpl.ExecuteTemplate(res, "recycleBinOptions.gohtml", nil)
+	tpl.ExecuteTemplate(res, "recycleBinOptions.gohtml", Data)
 }
 
 // Get user FB from DB.
 func queryFB(res http.ResponseWriter, req *http.Request) {
 	fmt.Println("Show user past Feedback with status.")
-	var feedBacks []RecycleBinDetails
-	userID := "Lanzs"
+
+	Data := struct {
+		PageName  string
+		UserName  string
+		Collector string
+		FeedBacks []RecycleBinDetails
+	}{PageName: "Query Feedback"}
+
+	user, err := getSession(req)
+	errlog.Trace.Println(user)
+	if err != nil {
+		errlog.Error.Println("error getting session")
+		return
+	}
+
+	if err != nil {
+		http.Redirect(res, req, "index.gohtml", http.StatusFound)
+		return
+	}
+	Data.UserName = user.userName
+	if user.isCollector {
+		Data.Collector = "Y"
+	}
+
+	// var feedBacks []RecycleBinDetails
+	userID := user.userId
 
 	fmt.Println(baseURLBin + "/feedback/" + userID)
 	// response, err := http.Get(baseURLBin + "/feedback/" + userID)
@@ -95,19 +146,37 @@ func queryFB(res http.ResponseWriter, req *http.Request) {
 	defer response.Body.Close()
 
 	JsonByteData, _ := ioutil.ReadAll(response.Body)
-	fmt.Println("User FB Recieved from Server in Json:", JsonByteData)
+	fmt.Println("User FB Recieved from Server in Json:", string(JsonByteData))
 
 	// convert JSON to object
-	json.Unmarshal(JsonByteData, &feedBacks)
-	fmt.Println("User FB  Details Recieved from Server in String:", feedBacks)
+	json.Unmarshal(JsonByteData, &Data.FeedBacks)
+	fmt.Println("User FB  Details Recieved from Server in String:", Data.FeedBacks)
 
-	tpl.ExecuteTemplate(res, "showUserFB.gohtml", feedBacks)
+	tpl.ExecuteTemplate(res, "showUserFB.gohtml", Data)
 
 }
 
 // show only recyclebins.
 func showRecycleBins(res http.ResponseWriter, req *http.Request) {
 	// response, err := http.Get(baseURLBin)
+
+	Data := struct {
+		PageName  string
+		UserName  string
+		Collector string
+		Bins      []RecycleBinDetails
+	}{PageName: "Show Recycle Bins"}
+
+	user, err := getSession(req)
+	if err != nil {
+		http.Redirect(res, req, "index.gohtml", http.StatusFound)
+		return
+	}
+	Data.UserName = user.userName
+	if user.isCollector {
+		Data.Collector = "Y"
+	}
+
 	response, err := http.Get(baseURLBin + "/NIL")
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -118,11 +187,10 @@ func showRecycleBins(res http.ResponseWriter, req *http.Request) {
 
 	JsonByteData, _ := ioutil.ReadAll(response.Body)
 	fmt.Println("ALL Bin Details Recieved from Server in Json:", JsonByteData)
-	allBinsDataJson := make([]RecycleBinDetails, 0)
 
 	// convert JSON to object
-	json.Unmarshal(JsonByteData, &allBinsDataJson)
-	fmt.Println("ALL Bin Details Recieved from Server in String:", allBinsDataJson)
+	json.Unmarshal(JsonByteData, &Data.Bins)
+	errlog.Trace.Println("ALL Bin Details Recieved from Server in String:", Data.Bins)
 
-	tpl.ExecuteTemplate(res, "showRecycleBinsDetails.gohtml", allBinsDataJson)
+	tpl.ExecuteTemplate(res, "showRecycleBinsDetails.gohtml", Data)
 }

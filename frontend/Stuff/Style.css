@@ -40,6 +40,7 @@ body {
   margin: 0;
   align-items: center;
 }
+
 a,
 img,
 h1,
@@ -50,6 +51,10 @@ h5,
 h6 {
   margin: 0px;
   padding: 0px;
+}
+
+body > h3 {
+  margin-left: 1.5%;
 }
 
 a {
@@ -190,35 +195,37 @@ input.InApplication:focus {
   outline: none;
   background: transparent;
 }
-/* div.InApplication {
-  border: solid;
-  border-color: #66bfbf;
-  overflow: hidden;
-  border-width: 1.5px;
-  padding: 0;
-  margin-left: 5%;
-  width: 90%;
-} */
 
-div.ViewBookings {
+div.CSSPickups {
   width: 95%;
   margin: 0 auto;
   margin-top: 15px;
   padding-top: 5px;
 }
 
-.ViewBookings table {
+.CSSPickups table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
 }
 
-.ViewBookings td {
+.CSSPickups td {
   padding-top: 5px;
 }
 
-.ViewBookings tr:nth-child(even) {
+.CSSPickups tr:nth-child(even) {
   background-color: #eaf6f6;
+}
+
+div.RecycleBin {
+  width: 95%;
+  margin: 0 auto;
+  padding-top: 5px;
+}
+
+input.RecycleBin,
+select.RecycleBin {
+  width: 100%;
 }
 
 /* </style>
