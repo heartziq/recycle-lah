@@ -31,7 +31,8 @@ func createServer(db *sql.DB) http.Handler {
 	//
 	subR.
 		Methods("GET", "PUT", "POST", "DELETE").
-		Path("/api/v1/pickups/{id}").
+		PathPrefix("/api/v1").
+		Path("/pickups/{id}").
 		Queries("key", "{key}").
 		Queries("role", "{role:user|collector}").
 		Handler(pickUpHandler)
@@ -45,7 +46,8 @@ func createServer(db *sql.DB) http.Handler {
 	//
 	router.
 		Methods("GET", "POST").
-		Path("/api/v1/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
+		PathPrefix("/api/v1").
+		Path("/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
 		Handler(recycleBinHandler)
 
 	return router
