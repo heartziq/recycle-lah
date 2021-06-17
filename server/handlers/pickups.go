@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -258,7 +260,9 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if role == "user" {
 		switch r.Method {
 		case "GET": // Show MY pickup in-progress
-			result := p.showPickupInProgress("12345") // replace "12345" with user_id
+			userId := fmt.Sprintf("%s", context.Get(r, "userid"))
+
+			result := p.showPickupInProgress(userId) // replace "12345" with user_id
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
 		case "POST": // Request for pickup (status, desc and weight_range, creation_date, updated_date)

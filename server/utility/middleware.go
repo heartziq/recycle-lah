@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -17,6 +18,7 @@ func VerifyAPIKey(next http.Handler) http.Handler {
 
 			// if valid key
 			if key == "secretkey" {
+
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -63,7 +65,9 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 					return
 
 				}
-				log.Printf("userid: %v", userid)
+
+				// Set userid
+				context.Set(r, "userid", userid)
 				next.ServeHTTP(w, r)
 				return
 
