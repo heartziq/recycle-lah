@@ -311,7 +311,6 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err == nil {
 				payload := map[string]string{}
 				json.Unmarshal(reqBody, &payload)
-				log.Println("[collector] accept a pickup")
 
 				if err != nil {
 					w.WriteHeader(http.StatusBadRequest)
