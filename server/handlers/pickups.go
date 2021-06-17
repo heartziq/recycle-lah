@@ -302,7 +302,8 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// collector
 		switch r.Method {
 		case "GET": // show current pickup that I am attending
-			result := p.showAcceptedPickups("54321")
+			userId := fmt.Sprintf("%s", context.Get(r, "userid"))
+			result := p.showAcceptedPickups(userId)
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
 		case "PUT": // cancel or accept (0,1,2,9)
