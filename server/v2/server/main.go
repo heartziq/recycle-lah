@@ -33,8 +33,7 @@ const (
 	created_by, attend_by,
 	completed
 	
-	FROM your_db.pickups
-	WHERE attend_by='';`
+	FROM your_db.pickups;`
 )
 
 type server struct {

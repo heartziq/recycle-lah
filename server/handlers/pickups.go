@@ -4,14 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -260,9 +258,14 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if role == "user" {
 		switch r.Method {
 		case "GET": // Show MY pickup in-progress
-			userId := fmt.Sprintf("%s", context.Get(r, "userid"))
+			// hardcode value - (FOR DEVELOPMENT PURPOSE ONLY)
+			userId := "14222"
 
-			result := p.showPickupInProgress(userId) // replace "12345" with user_id
+			// ***Uncomment this after merging with V1***
+			// userId extract from jwt token under audience claim
+			// userId := fmt.Sprintf("%s", context.Get(r, "userid"))
+
+			result := p.showPickupInProgress(userId)
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)
 		case "POST": // Request for pickup (status, desc and weight_range, creation_date, updated_date)
@@ -302,7 +305,12 @@ func (p *PickupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// collector
 		switch r.Method {
 		case "GET": // show current pickup that I am attending
-			userId := fmt.Sprintf("%s", context.Get(r, "userid"))
+			// hardcode value - (FOR DEVELOPMENT PURPOSE ONLY)
+			userId := "54321"
+
+			// ***Uncomment this after merging with V1***
+			// userId extract from jwt token under audience claim
+			// userId := fmt.Sprintf("%s", context.Get(r, "userid"))
 			result := p.showAcceptedPickups(userId)
 			w.WriteHeader(http.StatusAccepted)
 			json.NewEncoder(w).Encode(result)

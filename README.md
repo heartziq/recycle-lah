@@ -1,4 +1,57 @@
 ## Installation Steps:
+### Setup DB
+1. Launch Mysql workbench
+2. Logon with default root account on default port 3306
+3. Run the following sql statement to create a schema named ```your_db```
+
+```sql
+CREATE SCHEMA IF NOT EXISTS your_db;
+```
+4. Go to Server > Data Import. Import sql dumps located in:
+```
+...<ProjectRootFolder>/your_db
+```
+5. if steps 4 failed, manually run the following sql script
+
+```sql
+Use your_db;
+
+CREATE TABLE `pickups` (
+  `id` varchar(40) NOT NULL,
+  `coord` point NOT NULL,
+  `address` varchar(150) NOT NULL,
+  `created_by` varchar(40) NOT NULL,
+  `attend_by` varchar(40) NOT NULL DEFAULT '',
+  `completed` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idrecycle_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+```
+
+5. Create a recyle table
+
+```sql
+CREATE TABLE `recyclebinsdetails` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `BinID` varchar(10) DEFAULT NULL,
+  `BinType` varchar(10) DEFAULT NULL,
+  `BinLocationLat` double DEFAULT NULL,
+  `BinLocation﻿Long` double DEFAULT NULL,
+  `BinAddress` varchar(60) DEFAULT NULL,
+  `Postcode` varchar(10) DEFAULT NULL,
+  `UserID` varchar(30) DEFAULT NULL,
+  `FBOptions` varchar(20) DEFAULT NULL,
+  `ColorCode` varchar(20) DEFAULT NULL,
+  `Remarks` varchar(150) DEFAULT NULL,
+  `BinStatusUpdate` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+```
+6. Create a ```user1``` in mysql workbench and grant all privilege to ```your_db```
+The connection goes like this:
+```sh
+sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
+```
 ### /api/v1 (normal, restful, non-grpc)
 1. Clone project
 
@@ -46,10 +99,3 @@ go run main.go
 ```shell
 curl http://localhost:8090/api/v2/pickups
 ```
-
-### RecycleBinDetails
-
-| GET ``` https://localhost:5000/api/v1/recyclebindetails/{userId}``` | Get specific user recyclebin feedback via their UserID |
-| ------------------------------------------------------------ | ------------------------------------------------------ |
-| GET ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | Get all physical bin inventory i.e. where userId='NIL' |
-| POST ```https://localhost:5000/api/v1/recyclebindetails/NIL``` | add user feedback entry to DB                          |
