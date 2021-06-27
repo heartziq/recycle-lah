@@ -53,15 +53,16 @@ The connection goes like this:
 sql.Open("mysql", "user1:password@tcp(127.0.0.1:3306)/your_db")
 ```
 ### /api/v1 (normal, restful, non-grpc)
-1. Clone project
+1. Clone repo (or unzip if you are downloading via zip file)
 
 ```shell
 git clone https://github.com/heartziq/recycle-lah.git
 ```
 
-2. Generate own secret keys and certificate
+2. Go into the root of the project folder, create a folder named ```cert``` inside ```server/``` . Generate **own** secret keys and server certificate
 ```shell
 cd recycle-lah
+mkdir server/cert
 ./runthis.sh
 ```
 

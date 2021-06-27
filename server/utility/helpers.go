@@ -19,7 +19,8 @@ var (
 )
 
 func init() {
-	KEY = initSecretKey() // Secret key to sign jwt
+	// KEY = initSecretKey() // Secret key to sign jwt
+	KEY = "hahasecret" // for dev purpose
 
 }
 

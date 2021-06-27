@@ -65,7 +65,8 @@ func main() {
 
 	// Serve
 	go func() {
-		http.ListenAndServeTLS(":5000", "cert/cert.pem", "cert/key.pem", router)
+		// http.ListenAndServeTLS(":5000", "cert/cert.pem", "cert/key.pem", router)
+		http.ListenAndServe(":5000", router)
 	}()
 
 	c := make(chan os.Signal)
