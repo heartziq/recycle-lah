@@ -59,10 +59,8 @@ type Pickup struct {
 }
 
 type PickupHandler struct {
-	Db  *sql.DB
-	Tpl *template.Template
-	// error logging
-	// Info  *log.Logger
+	Db    *sql.DB
+	Tpl   *template.Template
 	Error *log.Logger
 }
 

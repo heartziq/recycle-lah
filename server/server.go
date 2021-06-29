@@ -19,6 +19,7 @@ func createServer(db *sql.DB) http.Handler {
 	// Initialize handlers
 	pickUpHandler := handlers.CreatePickupHandler(db, "")
 	recycleBinHandler := handlers.CreateRBinHandler(db, "")
+	loginHandler := handlers.CreateLoginHandler()
 
 	// Init Main Router
 	router := mux.NewRouter()
@@ -49,6 +50,17 @@ func createServer(db *sql.DB) http.Handler {
 		PathPrefix("/api/v1").
 		Path("/recyclebindetails/{userID:\\w+|NIL}"). // set to NIL or integer
 		Handler(recycleBinHandler)
+
+	//
+	// endpoint: Login //
+	//
+	router.
+		Methods("POST").
+		PathPrefix("/api/v1").
+		Path("/auth/{mode:register|login}").
+		Handler(loginHandler)
+
+	router.Use(middleware.ValidateJWTToken)
 
 	return router
 }

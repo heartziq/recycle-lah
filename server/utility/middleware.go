@@ -54,6 +54,7 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 				// validate token
 				userid, err := VerifyToken(token)
 				if err != nil {
+
 					log.Printf("Validate token err: %v\n", err.Error())
 					if err.Error() == "token expired" {
 						http.Redirect(w, r, "/gimme", http.StatusPermanentRedirect)
@@ -65,7 +66,11 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 					return
 
 				}
-
+				// test later
+				if r.RequestURI == "/api/v1/auth/login" || r.RequestURI == "/api/v1/auth/register" {
+					http.Redirect(w, r, "/api/v1/pickups/3?key=secretkey&role=user", http.StatusPermanentRedirect)
+					return
+				}
 				// Set userid
 				context.Set(r, "userid", userid)
 				next.ServeHTTP(w, r)
@@ -74,7 +79,10 @@ func ValidateJWTToken(next http.Handler) http.Handler {
 			}
 
 		}
-
+		if r.RequestURI == "/api/v1/auth/login" || r.RequestURI == "/api/v1/auth/register" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("401 - Status Unauthorized"))
 	})
