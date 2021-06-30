@@ -19,7 +19,7 @@ func createServer(db *sql.DB) http.Handler {
 	// Initialize handlers
 	pickUpHandler := handlers.CreatePickupHandler(db, "")
 	recycleBinHandler := handlers.CreateRBinHandler(db, "")
-	loginHandler := handlers.CreateLoginHandler()
+	loginHandler := handlers.CreateLoginHandler(db, "")
 
 	// Init Main Router
 	router := mux.NewRouter()
